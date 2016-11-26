@@ -19,12 +19,12 @@
         "datatables": "*",
         "highcharts": "*"        
     },
-     "keywords": {
+     "keywords": [
         "ControleOnline"
-     },
-  "authors": {
+     ],
+  "authors": [
     "Luiz Kim <luizkim@gmail.com>"
-  },
+  ],
   "license": "MIT",
   "private": true
 }
