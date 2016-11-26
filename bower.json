@@ -1,0 +1,30 @@
+{
+  "directory" : "public/components",
+  "name": "controleonline/core",
+  "description": "Core of Controle Online Systems",
+  "main": "",
+  "license": "BSD-3-Clause",
+  "homepage": "http://controleonline.com",
+  "ignore": {
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  },
+  "dependencies": {
+        "requirejs":"*",
+        "jquery": "*",
+        "bootstrap": "*",
+        "datatables": "*",
+        "highcharts": "*"        
+    },
+     "keywords": {
+        "ControleOnline"
+     },
+  "authors": {
+    "Luiz Kim <luizkim@gmail.com>"
+  },
+  "license": "MIT",
+  "private": true
+}
