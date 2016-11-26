@@ -25,6 +25,5 @@
   "authors": [
     "Luiz Kim <luizkim@gmail.com>"
   ],
-  "license": "MIT",
-  "private": true
+  "license": "BSD-3-Clause"  
 }
