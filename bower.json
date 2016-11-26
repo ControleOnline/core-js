@@ -5,13 +5,13 @@
   "main": "",
   "license": "BSD-3-Clause",
   "homepage": "http://controleonline.com",
-  "ignore": {
+  "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
     "tests"
-  },
+  ],
   "dependencies": {
         "requirejs":"*",
         "jquery": "*",
