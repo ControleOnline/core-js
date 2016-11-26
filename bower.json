@@ -1,6 +1,6 @@
 {
   "directory" : "public/components",
-  "name": "controleonline/core",
+  "name": "controleonline\\core-js",
   "description": "Core of Controle Online Systems",
   "main": "",
   "license": "BSD-3-Clause",
