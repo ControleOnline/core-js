@@ -1,57 +1,85 @@
-var core_js = {
-    __construct: (function () {
-        document.addEventListener("DOMContentLoaded", function () {
-            core_js.init();
-        });
-    })(),
-    init: function () {
-        core_js.config({
+define("ControleOnline", function () {
+    var ControleOnline = {};
+    ControleOnline.init = function () {
+        requirejs.config({
             baseUrl: '/vendor',
             paths: {
                 jquery: 'jquery/dist/jquery.min',
                 bootstrap: 'bootstrap/dist/js/bootstrap.min',
                 datatables: 'datatables/media/js/jquery.dataTables.min',
-                highcharts: 'highcharts/highcharts'
+                highcharts: 'highcharts/highcharts',
+                lazyLoad: 'controleonline-core-js/dist/js/LazyLoad'
             }
         });
-        core_js.datatables.init();
-    },
-    datatables: {
+        ControleOnline.datatables.init();
+        ControleOnline.lazyLoad.init();
+        ControleOnline.fontAwesome.init();
+        ControleOnline.bootstrap.init();
+
+    };
+    ControleOnline.bootstrap = {
         init: function () {
-            if ($('.datatable-ajax')) {
-                core_js.loadCss('/vendor/datatables/media/css/jquery.dataTables.min.css');
-                core_js.datatables.bind();
-            }
-        },
-        bind: function (table) {
-            requirejs(['datatables'], function (dt) {
-                $('.datatable-ajax').each(function (i) {
-                    var e = $(this);
-                    e.DataTable({
-                        "processing": true,
-                        "serverSide": true,
-                        "ajax": e.attr('data-source'),
-                        "rowCallback": function (row, data) {
-                            if ($.inArray(data.DT_RowId, selected) !== -1) {
-                                $(row).addClass('selected');
-                            }
-                        }
-                    });
-                });
-
-
+            requirejs(['jquery', 'bootstrap'], function () {
+                ControleOnline.loadCss('bootstrap/dist/css/bootstrap.min.css');
             });
         }
+    };
+    ControleOnline.fontAwesome = {
+        init: function () {
+            ControleOnline.loadCss('fontawesome/css/font-awesome.min.css');
+        }
     },
-    loadCss: function (url) {
+            ControleOnline.lazyLoad = {
+                init: function () {
+                    requirejs(['lazyLoad'], function (lazyLoad) {
+                        lazyLoad.init();
+                        ControleOnline.loadCss('controleonline-core-js/dist/css/LazyLoad.css');
+                    });
+                }
+            },
+            ControleOnline.datatables = {
+                init: function () {
+                    requirejs(['jquery'], function () {
+                        if ($('.datatable-ajax')) {
+                            ControleOnline.loadCss('datatables/media/css/jquery.dataTables.min.css');
+                            ControleOnline.datatables.bind();
+                        }
+                    });
+                },
+                bind: function (table) {
+                    requirejs(['datatables'], function (dt) {
+                        $('.datatable-ajax').each(function (i) {
+                            var e = $(this);
+                            e.DataTable({
+                                "processing": true,
+                                "serverSide": true,
+                                "ajax": e.attr('data-source'),
+                                "rowCallback": function (row, data) {
+                                    if ($.inArray(data.DT_RowId, selected) !== -1) {
+                                        $(row).addClass('selected');
+                                    }
+                                }
+                            });
+                        });
+
+
+                    });
+                }
+            };
+    ControleOnline.loadCss = function (url) {
+        var baseURL = require.toUrl('.');
         var link = document.createElement("link");
         link.type = "text/css";
         link.rel = "stylesheet";
-        link.href = url;
+        link.href = baseURL + url;
+
         document.getElementsByTagName("head")[0].appendChild(link);
-    },
-    config: function (config) {
+    };
+    ControleOnline.config = function (config) {
         requirejs.config(config);
-    }
-};
-core_js.init();
+    };
+    return ControleOnline;
+});
+requirejs(['ControleOnline'], function (ControleOnline) {
+    ControleOnline.init();
+});

@@ -6,29 +6,19 @@
  * Modified by Kai Zau - http://kaizau.com
  * Modified by Luiz Kim <luizkim@gmail.com>- http://controleonline.com
  */
-var lazyLoad = {
-    timer: document.querySelectorAll('[timer-ll]')[0] || 400,
-    cache: [],
-    verify: null,
-    throttleTimer: new Date().getTime(),
-    __construct: (function () {
-        /*
-         var sc = document.querySelectorAll('*'), scr = [];
-         for (var i = 0; i < sc.length; i++) {
-         var e = sc[i];
-         if (e.clientHeight != e.scrollHeight) {
-         scr.push(e);
-         document.getElementById("s").addEventListener("scroll", lazyLoad.throttledLoad);
-         console.log(e.clientHeight + 'x' + e.scrollHeight);
-         }
-         }
-         console.log(scr);
-         */
+
+define("lazyLoad", function () {
+    var lazyLoad = {};
+    lazyLoad.timer = document.querySelectorAll('[timer-ll]')[0] || 400;
+    lazyLoad.cache = [];
+    lazyLoad.verify = null;
+    lazyLoad.throttleTimer = new Date().getTime();
+    lazyLoad.__construct = (function () {
         document.addEventListener("DOMContentLoaded", function () {
             lazyLoad.init();
         });
-    })(),    
-    forceLoadImages: function (selector) {
+    })();
+    lazyLoad.forceLoadImages = function (selector) {
         /*
          * Example: lazyLoad.forceLoadImages('img[data-ll]');
          */
@@ -38,25 +28,25 @@ var lazyLoad = {
             imageNode.src = imageNode.getAttribute('data-ll');
             imageNode.className = imageNode.className.replace(/(^|\s+)lazy-load(\s+|$)/, '$1lazy-loaded$2');
         }
-    },
-    addObservers: function () {
+    };
+    lazyLoad.addObservers = function () {
         addEventListener('scroll', lazyLoad.throttledLoad);
         addEventListener('resize', lazyLoad.throttledLoad);
         addEventListener('DOMSubtreeModified', lazyLoad.throttledLoad);
-    },
-    removeObservers: function () {
+    };
+    lazyLoad.removeObservers = function () {
         removeEventListener('scroll', lazyLoad.throttledLoad, false);
         removeEventListener('resize', lazyLoad.throttledLoad, false);
         removeEventListener('DOMSubtreeModified', lazyLoad.throttledLoad, false);
-    },
-    throttledLoad: function () {
+    };
+    lazyLoad.throttledLoad = function () {
         var now = new Date().getTime();
         if ((now - lazyLoad.throttleTimer) >= 200) {
             lazyLoad.throttleTimer = now;
             lazyLoad.loadVisibleImages();
         }
-    },
-    loadVisibleImages: function () {
+    };
+    lazyLoad.loadVisibleImages = function () {
         var scrollY = window.pageYOffset || document.documentElement.scrollTop;
         var pageHeight = window.innerHeight || document.documentElement.clientHeight;
         var range = {
@@ -86,15 +76,15 @@ var lazyLoad = {
             lazyLoad.removeObservers();
             clearInterval(lazyLoad.verify);
         }
-    },
-    removeScripts: function () {
+    };
+    lazyLoad.removeScripts = function () {
         var ns = document.querySelectorAll('.ns-ll');
         for (var i = 0; i < ns.length; i++) {
             var n = ns[i];
             n.parentNode.removeChild(n);
         }
-    },
-    init: function () {
+    };
+    lazyLoad.init = function () {
         lazyLoad.removeScripts();
         if (!document.querySelectorAll) {
             document.querySelectorAll = function (selector) {
@@ -122,10 +112,10 @@ var lazyLoad = {
                 window.dispatchEvent(evt);
             }
         }, lazyLoad.timer);
-    },
+    };
     // For IE7 compatibility
     // Adapted from http://www.quirksmode.org/js/findpos.html
-    getOffsetTop: function (el) {
+    lazyLoad.getOffsetTop = function (el) {
         var val = 0;
         if (el.offsetParent) {
             do {
@@ -134,4 +124,5 @@ var lazyLoad = {
             return val;
         }
     }
-};  
+    return lazyLoad;
+});
