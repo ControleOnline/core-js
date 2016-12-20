@@ -65,7 +65,7 @@ define("lazyLoad", function () {
                     this.className = this.className.replace(/(^|\s+)lazy-load(\s+|$)/, '$1lazy-loaded$2');
                 };
                 image.src = ll;
-                //image.removeAttribute('data-ll');
+                image.removeAttribute('data-ll');
                 lazyLoad.cache.splice(i, 1);
                 continue;
             }
