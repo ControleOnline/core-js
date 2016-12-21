@@ -13,7 +13,7 @@ define("core", function () {
                 core: 'controleonline-core-js/dist/js/Core'
             }
         };
-        for (k in appFiles) {
+        for (var k in appFiles) {
             config.paths[k] = appFiles[k];
         }
         require.config(config);
@@ -24,7 +24,7 @@ define("core", function () {
         this.lazyLoad.init();
         this.fontAwesome.init();
         this.dataTables.init();
-        for (k in appFiles) {
+        for (var k in appFiles) {
             require([k], function (appFile) {
                 appFile.init();
             });
