@@ -18,7 +18,8 @@
         "bootstrap": "*",
         "fontawesome":"*",
         "datatables": "*",
-        "highcharts": "*"        
+        "highcharts": "*",
+        "jquery.inputmask":"*"        
     },
      "keywords": [
         "ControleOnline"
