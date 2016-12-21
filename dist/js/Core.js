@@ -1,61 +1,76 @@
-define("ControleOnline", function () {
-    var ControleOnline = {};
-    ControleOnline.config = {
-        baseUrl: '/vendor',
-        paths: {
-            jquery: 'jquery/dist/jquery.min',
-            bootstrap: 'bootstrap/dist/js/bootstrap.min',
-            datatables: 'datatables/media/js/jquery.dataTables.min',
-            highcharts: 'highcharts/highcharts',
-            lazyLoad: 'controleonline-core-js/dist/js/LazyLoad'
+define("core", function () {
+    var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
+    var core = {};
+    core.config = function () {
+        var config = {
+            baseUrl: '/vendor',
+            paths: {
+                jquery: 'jquery/dist/jquery.min',
+                bootstrap: 'bootstrap/dist/js/bootstrap.min',
+                datatables: 'datatables/media/js/jquery.dataTables.min',
+                highcharts: 'highcharts/highcharts',
+                lazyLoad: 'controleonline-core-js/dist/js/LazyLoad',
+                core: 'controleonline-core-js/dist/js/Core'
+            }
+        };
+        for (k in appFiles) {
+            config.paths[k] = appFiles[k];
         }
+        require.config(config);
     };
-    ControleOnline.init = function () {
-        requirejs.config(ControleOnline.config);        
-        ControleOnline.bootstrap.init();
-        ControleOnline.lazyLoad.init();
-        ControleOnline.fontAwesome.init();        
-        ControleOnline.datatables.init();
-    };
-    ControleOnline.bootstrap = {
-        init: function () {
-            requirejs(['jquery', 'bootstrap'], function () {
-                ControleOnline.loadCss('bootstrap/dist/css/bootstrap.min.css');
+    core.init = function () {
+        this.config();
+        this.bootstrap.init();
+        this.lazyLoad.init();
+        this.fontAwesome.init();
+        this.dataTables.init();
+        for (k in appFiles) {
+            require([k], function (appFile) {
+                appFile.init();
             });
         }
     };
-    ControleOnline.fontAwesome = {
+    core.bootstrap = {
         init: function () {
-            requirejs(['jquery'], function () {
+            require(['jquery'], function () {
+                require(['bootstrap'], function () {
+                    core.loadCss('bootstrap/dist/css/bootstrap.min.css');
+                });
+            });
+        }
+    };
+    core.fontAwesome = {
+        init: function () {
+            require(['jquery'], function ($) {
                 if ($('.fa').length) {
-                    ControleOnline.loadCss('fontawesome/css/font-awesome.min.css');
+                    core.loadCss('fontawesome/css/font-awesome.min.css');
                 }
             });
         }
     };
-    ControleOnline.lazyLoad = {
+    core.lazyLoad = {
         init: function () {
-            requirejs(['jquery'], function () {
+            require(['jquery'], function ($) {
                 if ($('[data-ll]').length) {
-                    requirejs(['lazyLoad'], function (lazyLoad) {
+                    require(['lazyLoad'], function (lazyLoad) {
                         lazyLoad.init();
-                        ControleOnline.loadCss('controleonline-core-js/dist/css/LazyLoad.css');
+                        core.loadCss('controleonline-core-js/dist/css/LazyLoad.css');
                     });
                 }
             });
         }
     };
-    ControleOnline.datatables = {
+    core.dataTables = {
         init: function () {
-            requirejs(['jquery'], function () {
+            require(['jquery'], function ($) {
                 if ($('.datatable').length) {
-                    ControleOnline.loadCss('datatables/media/css/jquery.dataTables.min.css');
-                    ControleOnline.datatables.bind('.datatable');
+                    core.loadCss('datatables/media/css/jquery.dataTables.min.css');
+                    core.dataTables.bind('.datatable');
                 }
             });
         },
         bind: function (table) {
-            requirejs(['datatables'], function (dt) {
+            require(['datatables'], function (dt) {
                 $(table).each(function (i) {
                     var e = $(this);
                     e.DataTable({
@@ -72,17 +87,17 @@ define("ControleOnline", function () {
             });
         }
     };
-    ControleOnline.loadCss = function (url) {
-        var baseURL = requirejs.toUrl('.');
+    core.loadCss = function (url) {
+        var baseURL = require.toUrl('.');
         var link = document.createElement("link");
         link.type = "text/css";
         link.rel = "stylesheet";
         link.href = baseURL + url;
-
         document.getElementsByTagName("head")[0].appendChild(link);
     };
-    return ControleOnline;
+
+    return core;
 });
-requirejs(['ControleOnline'], function (ControleOnline) {
-    ControleOnline.init();
+require(['core'], function (core) {
+    core.init();
 });
