@@ -35,100 +35,127 @@ define("core", function () {
         }
         require.config(config);
         require(['jquery'], function ($) {
+            var spin = '<i class="ajax-spin-save fa fa-spinner fa-spin"></i>';
             $.ajaxSetup({
                 beforeSend: function () {
-                    var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
-                    loading += '<div class="modal-dialog">';
-                    loading += '<div class="modal-content">';
-                    loading += '<div class="modal-header" style="text-align: center">';
-                    loading += '<h3>Por favor aguarde</h3>';
-                    loading += '</div>';
-                    loading += '<div class="modal-body" >';
-                    loading += '<div style="height:200px">';
-                    loading += '<i class="fa fa-spinner fa-6x fa-6 fa-spin" aria-hidden="true" style="font-size: 6em !important; position: absolute;display: block;top: 50%;left: 50%;margin-left: -50px;margin-top: -50px;"></i>';
-                    loading += '</div>';
-                    loading += '</div>';
-                    loading += '<div class="modal-footer" style="text-align: center"></div>';
-                    loading += '</div>';
-                    loading += '</div>';
-                    loading += '</div>';
-                    loading += '</div>';
-                    if (!$('body').find('#wait-modal').length) {
-                        $('body').append(loading);
+                    var elem = $('[data-clicked=true]');
+                    $(elem).attr('data-save');
+                    if ($(elem).attr('data-save')) {
+                        $(elem).append(spin);
+                        $(elem).prop("disabled", true);
+                    } else {
+                        var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
+                        loading += '<div class="modal-dialog">';
+                        loading += '<div class="modal-content">';
+                        loading += '<div class="modal-header" style="text-align: center">';
+                        loading += '<h3>Por favor aguarde</h3>';
+                        loading += '</div>';
+                        loading += '<div class="modal-body" >';
+                        loading += '<div style="height:200px">';
+                        loading += '<i class="fa fa-spinner fa-6x fa-6 fa-spin" aria-hidden="true" style="font-size: 6em !important; position: absolute;display: block;top: 50%;left: 50%;margin-left: -50px;margin-top: -50px;"></i>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        loading += '<div class="modal-footer" style="text-align: center"></div>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        if (!$('body').find('#wait-modal').length) {
+                            $('body').append(loading);
+                        }
+                        $('#wait-modal').modal('show');
                     }
-                    $('#wait-modal').modal('show');
                 },
                 complete: function (data) {
-                    $('#wait-modal').modal('hide');
-                    if (typeof data === 'object') {
-                        if (data.responseJSON) {
-                            var data = JSON.parse(data.responseText);
-                            if (data.response && data.response.success) {
-                                core.show.success();
-                            } else if (data.response && data.response.error) {
-                                core.show.error(data.response.error);
-                            } else {
-                                core.show.error();
-                            }
-                        } else if (data.responseText) {
-                            var response = $(data.responseText);
-                            if (response.hasClass('modal')) {
-                                var id = response.attr('id');
-                                if (!id) {
-                                    id = Date.now() / 1000 | 0;
-                                    response.attr('id', id);
-                                }
-                                if ($('body').find('#' + id).length) {
-                                    $('body').find('#' + id).remove();
-                                }
-                                $('body').append(response);
-                                $('body').find('#' + id).modal('show');
-                                core.bind('#' + id);
-                            }
-                        } else {
-                            core.show.error();
-                        }
+                    var elem = $('[data-clicked=true]');
+                    $(elem).attr('data-save');
+                    if ($(elem).attr('data-save')) {
+                        $(elem).find('.ajax-spin-save').remove();
+                        $(elem).prop("disabled", false);
+                    } else {
+                        $('#wait-modal').modal('hide');
                     }
+                    core.show.result(data);
                 }
             });
+
+
         });
 
     };
     core.show = {
+        result: function (data) {
+            if (typeof data === 'object') {
+                if (data.responseJSON) {
+                    var data = JSON.parse(data.responseText);
+                    if (data.response && data.response.success) {
+                        core.show.success();
+                    } else if (data.response && data.response.error) {
+                        core.show.error(data.response.error);
+                    } else {
+                        core.show.error();
+                    }
+                } else if (data.responseText) {
+                    var response = $(data.responseText);
+                    if (response.hasClass('modal')) {
+                        var id = response.attr('id');
+                        if (!id) {
+                            id = Date.now() / 1000 | 0;
+                            response.attr('id', id);
+                        }
+                        if ($('body').find('#' + id).length) {
+                            $('body').find('#' + id).remove();
+                        }
+                        $('body').append(response);
+                        $('body').find('#' + id).modal('show');
+                        core.bind('#' + id);
+                    }
+                } else {
+                    core.show.error();
+                }
+            }
+        },
         error: function (error) {
             require(['jquery'], function ($) {
                 error = error ? error : 'Nenhuma resposta';
                 var id = Date.now() / 1000 | 0;
-                var msg = '<div id="' + id + '" class="alert alert-danger fade in alert-dismissable">';
+                var msg = '<div id="message-' + id + '" class="message-' + id + ' alert alert-danger fade in alert-dismissable">';
                 msg += '<strong>';
                 msg += error;
                 msg += '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>';
                 msg += '</strong>';
                 msg += '</div>';
-                $(msg).prependTo($('#main-container'));
+                $(msg).prependTo($('.show-messages'));
             });
         },
         success: function (success) {
             require(['jquery'], function ($) {
                 success = success ? success : 'Sucesso!';
                 var id = Date.now() / 1000 | 0;
-                var msg = '<div id="' + id + '" class="alert alert-success fade in alert-dismissable">';
+                var msg = '<div id="message-' + id + '" class="message-' + id + ' alert alert-success fade in alert-dismissable">';
                 msg += '<strong>';
                 msg += success;
                 msg += '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>';
                 msg += '</strong>';
                 msg += '</div>';
-                $(msg).prependTo($('#main-container'));
-                $("#" + id).fadeTo(5000, 500).slideUp(500, function () {
-                    $("#" + id).slideUp(500);
+                $(msg).prependTo($('.show-messages'));
+                $(".message-" + id).fadeTo(5000, 500).slideUp(500, function () {
+                    $(".message-" + id).slideUp(500);
                 });
+
             });
         }
     };
     core.bind = function (selector) {
-        selector = selector ? selector + ' ' : '';
-        core.crud.init.add(selector + "[data-add]");
-        core.crud.init.save(selector + "[data-save]");
+        require(['jquery'], function ($) {
+            selector = selector ? selector : '*';
+            core.crud.init.add($(selector).find("[data-add]"));
+            core.crud.init.save($(selector).find("[data-save]"));
+            $(selector).find("*").click(function (e) {
+                $("*").removeAttr('data-clicked');
+                $(e.target).attr("data-clicked", true);
+            });
+        });
     };
 
     core.init = function () {
@@ -153,7 +180,6 @@ define("core", function () {
                         $(selector).each(function () {
                             $(this).click(function (e) {
                                 e.preventDefault();
-                                $('.modal').modal('hide');
                                 $.ajax({
                                     url: $(selector).data('add'),
                                     context: document.body
@@ -169,7 +195,6 @@ define("core", function () {
                         $(selector).each(function () {
                             $(this).click(function (e) {
                                 e.preventDefault();
-                                $('.modal').modal('hide');
                                 $.ajax({
                                     url: $(selector).data('save'),
                                     method: 'POST',
