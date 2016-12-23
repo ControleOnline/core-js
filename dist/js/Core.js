@@ -1,25 +1,26 @@
 define("core", function () {
     var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
+    var systemVersion = document.querySelectorAll('body')[0].getAttribute('system-version');
     var core = {};
 
     core.config = function () {
         var config = {
             baseUrl: '/vendor',
             paths: {
-                'core': 'controleonline-core-js/dist/js/Core',
-                'jquery': 'jquery/dist/jquery.min',
-                'lazyLoad': 'controleonline-core-js/dist/js/LazyLoad',
-                'bootstrap': 'bootstrap/dist/js/bootstrap.min',
-                'datatables': 'datatables/media/js/jquery.dataTables.min',
-                'highcharts': 'highcharts/highcharts',
-                'inputmask': 'jquery.inputmask/dist/min/inputmask/inputmask.min',
-                'inputmask.dependencyLib': 'jquery.inputmask/dist/min/inputmask/inputmask.dependencyLib.jquery.min',
-                'inputmask.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.extensions.min",
-                'inputmask.date.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.date.extensions.min",
-                'inputmask.numeric.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.numeric.extensions.min",
-                'inputmask.phone.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.phone.extensions.min",
-                'inputmask.regex.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.regex.extensions.min",
-                'jquery.inputmask': "jquery.inputmask/dist/min/inputmask/jquery.inputmask.min"
+                'core': 'controleonline-core-js/dist/js/Core' + '?v=' + systemVersion,
+                'jquery': 'jquery/dist/jquery.min' + '?v=' + systemVersion,
+                'lazyLoad': 'controleonline-core-js/dist/js/LazyLoad' + '?v=' + systemVersion,
+                'bootstrap': 'bootstrap/dist/js/bootstrap.min' + '?v=' + systemVersion,
+                'datatables': 'datatables/media/js/jquery.dataTables.min' + '?v=' + systemVersion,
+                'highcharts': 'highcharts/highcharts' + '?v=' + systemVersion,
+                'inputmask': 'jquery.inputmask/dist/min/inputmask/inputmask.min' + '?v=' + systemVersion,
+                'inputmask.dependencyLib': 'jquery.inputmask/dist/min/inputmask/inputmask.dependencyLib.jquery.min' + '?v=' + systemVersion,
+                'inputmask.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.extensions.min" + '?v=' + systemVersion,
+                'inputmask.date.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.date.extensions.min" + '?v=' + systemVersion,
+                'inputmask.numeric.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.numeric.extensions.min" + '?v=' + systemVersion,
+                'inputmask.phone.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.phone.extensions.min" + '?v=' + systemVersion,
+                'inputmask.regex.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.regex.extensions.min" + '?v=' + systemVersion,
+                'jquery.inputmask': "jquery.inputmask/dist/min/inputmask/jquery.inputmask.min" + '?v=' + systemVersion
             },
             shim: {
                 jquery: {
@@ -35,8 +36,6 @@ define("core", function () {
             config.paths[k] = appFiles[k];
         }
         require.config(config);
-
-
     };
     core.init = function () {
         this.config();
@@ -53,6 +52,10 @@ define("core", function () {
                 }
             });
         }
+        require(['jquery'], function ($) {
+            $('body').removeAttr('data-js-files');
+        });
+
     };
     core.ajax = {
         init: function () {
