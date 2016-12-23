@@ -1,6 +1,7 @@
 define("core", function () {
     var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
     var core = {};
+
     core.config = function () {
         var config = {
             baseUrl: '/vendor',
@@ -34,55 +35,75 @@ define("core", function () {
             config.paths[k] = appFiles[k];
         }
         require.config(config);
-        require(['jquery'], function ($) {
-            var spin = '<i class="ajax-spin-save fa fa-spinner fa-spin"></i>';
-            $.ajaxSetup({
-                beforeSend: function () {
-                    var elem = $('[data-clicked=true]');
-                    $(elem).attr('data-save');
-                    if ($(elem).attr('data-save')) {
-                        $(elem).append(spin);
-                        $(elem).prop("disabled", true);
-                    } else {
-                        var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
-                        loading += '<div class="modal-dialog">';
-                        loading += '<div class="modal-content">';
-                        loading += '<div class="modal-header" style="text-align: center">';
-                        loading += '<h3>Por favor aguarde</h3>';
-                        loading += '</div>';
-                        loading += '<div class="modal-body" >';
-                        loading += '<div style="height:200px">';
-                        loading += '<i class="fa fa-spinner fa-6x fa-6 fa-spin" aria-hidden="true" style="font-size: 6em !important; position: absolute;display: block;top: 50%;left: 50%;margin-left: -50px;margin-top: -50px;"></i>';
-                        loading += '</div>';
-                        loading += '</div>';
-                        loading += '<div class="modal-footer" style="text-align: center"></div>';
-                        loading += '</div>';
-                        loading += '</div>';
-                        loading += '</div>';
-                        loading += '</div>';
-                        if (!$('body').find('#wait-modal').length) {
-                            $('body').append(loading);
-                        }
-                        $('#wait-modal').modal('show');
-                    }
-                },
-                complete: function (data) {
-                    var elem = $('[data-clicked=true]');
-                    $(elem).attr('data-save');
-                    if ($(elem).attr('data-save')) {
-                        $(elem).find('.ajax-spin-save').remove();
-                        $(elem).prop("disabled", false);
-                    } else {
-                        $('#wait-modal').modal('hide');
-                    }
-                    core.show.result(data);
-                }
-            });
 
-
-        });
 
     };
+    core.init = function () {
+        this.config();
+        this.bootstrap.init();
+        this.lazyLoad.init();
+        this.ajax.init();
+        this.inputMask.init();
+        this.dataTables.init();
+        this.bind();
+        for (var k in appFiles) {
+            require([k], function (appFile) {
+                if (typeof appFile.init === 'function') {
+                    appFile.init();
+                }
+            });
+        }
+    };
+    core.ajax = {
+        init: function () {
+            require(['jquery'], function ($) {
+                var spin = '<i class="ajax-spin-save fa fa-spinner fa-spin"></i>';
+                $.ajaxSetup({
+                    beforeSend: function () {
+                        var elem = $('[data-clicked=true]');
+                        $(elem).attr('data-save');
+                        if ($(elem).attr('data-save')) {
+                            $(elem).append(spin);
+                            $(elem).prop("disabled", true);
+                        } else {
+                            var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
+                            loading += '<div class="modal-dialog">';
+                            loading += '<div class="modal-content">';
+                            loading += '<div class="modal-header" style="text-align: center">';
+                            loading += '<h3>Por favor aguarde</h3>';
+                            loading += '</div>';
+                            loading += '<div class="modal-body" >';
+                            loading += '<div style="height:200px">';
+                            loading += '<i class="fa fa-spinner fa-6x fa-6 fa-spin" aria-hidden="true" style="font-size: 6em !important; position: absolute;display: block;top: 50%;left: 50%;margin-left: -50px;margin-top: -50px;"></i>';
+                            loading += '</div>';
+                            loading += '</div>';
+                            loading += '<div class="modal-footer" style="text-align: center"></div>';
+                            loading += '</div>';
+                            loading += '</div>';
+                            loading += '</div>';
+                            loading += '</div>';
+                            if (!$('body').find('#wait-modal').length) {
+                                $('body').append(loading);
+                            }
+                            $('#wait-modal').modal('show');
+                        }
+                    },
+                    complete: function (data) {
+                        var elem = $('[data-clicked=true]');
+                        $(elem).attr('data-save');
+                        if ($(elem).attr('data-save')) {
+                            $(elem).find('.ajax-spin-save').remove();
+                            $(elem).prop("disabled", false);
+                        } else {
+                            $('#wait-modal').modal('hide');
+                        }
+                        core.show.result(data);
+                    }
+                });
+            });
+        }
+    };
+
     core.show = {
         result: function (data) {
             if (typeof data === 'object') {
@@ -158,20 +179,7 @@ define("core", function () {
         });
     };
 
-    core.init = function () {
-        this.config();
-        this.bootstrap.init();
-        this.lazyLoad.init();
-        this.inputMask.init();
-        this.fontAwesome.init();
-        this.dataTables.init();
-        this.bind();
-        for (var k in appFiles) {
-            require([k], function (appFile) {
-                appFile.init();
-            });
-        }
-    };
+
     core.crud = {
         init: {
             add: function (selector) {
@@ -227,18 +235,12 @@ define("core", function () {
             });
         }
     };
-    core.fontAwesome = {
-        init: function () {
-            core.loadCss('fontawesome/css/font-awesome.min.css');
-        }
-    };
     core.lazyLoad = {
         init: function () {
             require(['jquery'], function ($) {
                 if ($('[data-ll]').length) {
                     require(['lazyLoad'], function (lazyLoad) {
                         lazyLoad.init();
-                        core.loadCss('controleonline-core-js/dist/css/LazyLoad.css');
                     });
                 }
             });
