@@ -1,6 +1,6 @@
 define("core", function () {
     var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
-    var systemVersion = document.querySelectorAll('body')[0].getAttribute('system-version');
+    var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
     var core = {};
 
     core.config = function () {
