@@ -228,6 +228,17 @@ define("core", function () {
                         });
                     });
                 }
+
+                if ($("[data-mask-regex]").length) {
+                    require(['jquery', 'jquery.inputmask', 'inputmask.regex.extensions'], function ($, inputmask, regex) {
+                        $("[data-mask-regex").each(function () {
+                            $(this).inputmask('Regex',eval($(this).data('mask-regex')));
+                        });
+                    });
+                }
+
+
+
             });
         }
     };
@@ -282,7 +293,11 @@ define("core", function () {
         link.type = "text/css";
         link.rel = "stylesheet";
         link.href = baseURL + url;
-        document.getElementsByTagName("head")[0].appendChild(link);
+        require(['datatables'], function (dt) {
+            if ($('link [href="' + baseURL + url + '"]').length === 0) {
+                document.getElementsByTagName("head")[0].appendChild(link);
+            }
+        });
     };
 
     return core;

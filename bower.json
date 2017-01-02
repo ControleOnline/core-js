@@ -19,7 +19,8 @@
         "fontawesome":"*",
         "datatables": "*",
         "highcharts": "*",
-        "jquery.inputmask":"*"        
+        "jquery.inputmask":"*",
+        "jquery-form-validator":"*"
     },
      "keywords": [
         "ControleOnline"
