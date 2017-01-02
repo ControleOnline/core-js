@@ -1,6 +1,7 @@
 define("core", function () {
     var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
     var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
+    var userLanguage = 'pt';
     var core = {};
 
     core.config = function () {
@@ -20,14 +21,12 @@ define("core", function () {
                 'inputmask.numeric.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.numeric.extensions.min" + '?v=' + systemVersion,
                 'inputmask.phone.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.phone.extensions.min" + '?v=' + systemVersion,
                 'inputmask.regex.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.regex.extensions.min" + '?v=' + systemVersion,
-                'jquery.inputmask': "jquery.inputmask/dist/min/inputmask/jquery.inputmask.min" + '?v=' + systemVersion
+                'jquery.inputmask': "jquery.inputmask/dist/min/inputmask/jquery.inputmask.min" + '?v=' + systemVersion,
+                'form-validator': 'jquery-form-validator/form-validator/jquery.form-validator.min' + '?v=' + systemVersion,
+
             },
             shim: {
                 jquery: {
-                    exports: "$"
-                },
-                jQueryInputmask: {
-                    deps: ["jquery", "inputmask"],
                     exports: "$"
                 }
             }
@@ -42,8 +41,6 @@ define("core", function () {
         this.bootstrap.init();
         this.lazyLoad.init();
         this.ajax.init();
-        this.inputMask.init();
-        this.dataTables.init();
         this.bind();
         for (var k in appFiles) {
             require([k], function (appFile) {
@@ -172,12 +169,19 @@ define("core", function () {
     };
     core.bind = function (selector) {
         require(['jquery'], function ($) {
-            selector = selector ? selector : '*';
-            core.crud.init.add($(selector).find("[data-add]"));
-            core.crud.init.save($(selector).find("[data-save]"));
-            $(selector).find("*").click(function (e) {
-                $("*").removeAttr('data-clicked');
-                $(e.target).attr("data-clicked", true);
+            $(function () {
+                selector = selector ? selector : '*';
+                core.crud.init.add($(selector).find("[data-add]"));
+                core.crud.init.save($(selector).find("[data-save]"));
+                core.formValidator.init($(selector).find("[data-validation]"));
+                //core.inputMask.init.mask($(selector).find("[data-mask]"));
+                //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
+                core.dataTables.init($(selector).find('.datatable'));
+
+                $(selector).find("*").click(function (e) {
+                    $("*").removeAttr('data-clicked');
+                    $(e.target).attr("data-clicked", true);
+                });
             });
         });
     };
@@ -218,28 +222,56 @@ define("core", function () {
             }
         }
     };
-    core.inputMask = {
-        init: function () {
+    core.formValidator = {
+        init: function (selector) {
             require(['jquery'], function ($) {
-                if ($("[data-mask]").length) {
-                    require(['jquery', 'jquery.inputmask'], function ($, inputmask) {
-                        $("[data-mask]").each(function () {
-                            $(this).inputmask(eval($(this).data('mask')));
+                if ($(selector).length) {
+                    require(['form-validator'], function () {
+                        $.validate({
+                            lang: userLanguage,
+                            modules: ['security','location'],
                         });
                     });
                 }
-
-                if ($("[data-mask-regex]").length) {
-                    require(['jquery', 'jquery.inputmask', 'inputmask.regex.extensions'], function ($, inputmask, regex) {
-                        $("[data-mask-regex").each(function () {
-                            $(this).inputmask('Regex',eval($(this).data('mask-regex')));
-                        });
-                    });
-                }
-
-
-
             });
+        }
+    };
+    core.inputMask = {
+        init: {
+            mask: function (selector) {
+                require(['jquery'], function ($) {
+                    if ($(selector).length) {
+                        require(['inputmask', 'jquery.inputmask'], function () {
+                            $(selector).each(function () {
+                                $(this).inputmask(eval($(this).data('mask')));
+                            });
+                        });
+                    }
+                });
+            },
+            maskRegex: function (selector) {
+                /*
+                 $(selector).each(function () {
+                 if ($(this).data('validation-backend')) {
+                 $(this).blur(function () {
+                 $(this).validate(function (valid, elem) {
+                 console.log('Element ' + elem.name + ' is ' + (valid ? 'valid' : 'invalid') + ' ' + $(elem).data('validation-backend'));
+                 });
+                 
+                 });
+                 }
+                 });
+                 */
+                require(['jquery'], function ($) {
+                    if ($(selector).length) {
+                        require(['inputmask', 'jquery.inputmask', 'inputmask.regex.extensions'], function () {
+                            $(selector).each(function () {
+                                $(this).inputmask('Regex', eval($(this).data('mask-regex')));
+                            });
+                        });
+                    }
+                });
+            }
         }
     };
     core.bootstrap = {
@@ -261,11 +293,11 @@ define("core", function () {
         }
     };
     core.dataTables = {
-        init: function () {
+        init: function (selector) {
             require(['jquery'], function ($) {
-                if ($('.datatable').length) {
+                if ($(selector).length) {
                     core.loadCss('datatables/media/css/jquery.dataTables.min.css');
-                    core.dataTables.bind('.datatable');
+                    core.dataTables.bind(selector);
                 }
             });
         },
