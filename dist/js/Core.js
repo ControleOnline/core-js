@@ -229,7 +229,7 @@ define("core", function () {
                     require(['form-validator'], function () {
                         $.validate({
                             lang: userLanguage,
-                            modules: ['security','location'],
+                            modules: ['security', 'location'],
                         });
                     });
                 }
@@ -335,5 +335,12 @@ define("core", function () {
     return core;
 });
 require(['core'], function (core) {
-    core.init();
+    if (document.readyState === "complete") {
+        core.init();
+    } else {
+        window.addEventListener("onload", function () {
+            core.init();
+        }, false);
+        //document.addEventListener("DOMContentLoaded", function () {/* code */}, false);
+    }
 });
