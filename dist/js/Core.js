@@ -13,8 +13,8 @@ define("core", function () {
                 'lazyLoad': 'controleonline-core-js/dist/js/LazyLoad.js' + '?v=' + systemVersion,
                 'bootstrap': 'bootstrap/dist/js/bootstrap.min.js' + '?v=' + systemVersion,
                 'bootstrap-switch': 'bootstrap-switch/dist/js/bootstrap-switch.min.js' + '?v=' + systemVersion,
-                'datatables': 'datatables/media/js/jquery.dataTables.min.js' + '?v=' + systemVersion,
-                'dataTables-bootstrap': 'datatables/media/js/jquery.dataTables.bootstrap.min.js' + '?v=' + systemVersion,
+                'datatables.net': 'datatables/media/js/jquery.dataTables.min.js' + '?v=' + systemVersion,
+                'dataTables-bootstrap': 'datatables/media/js/dataTables.bootstrap4.min.js' + '?v=' + systemVersion,
                 'highcharts': 'highcharts/highcharts.js' + '?v=' + systemVersion,
                 'inputmask': 'jquery.inputmask/dist/min/inputmask/inputmask.min.js' + '?v=' + systemVersion,
                 'inputmask.dependencyLib': 'jquery.inputmask/dist/min/inputmask/inputmask.dependencyLib.jquery.min.js' + '?v=' + systemVersion,
@@ -303,15 +303,17 @@ define("core", function () {
         init: function (selector) {
             require(['jquery'], function ($) {
                 if ($(selector).length) {
-                    core.loadCss('datatables/media/css/jquery.dataTables.min.css');
+                    //core.loadCss('datatables/media/css/jquery.dataTables.min.css');
                     core.dataTables.bind(selector);
                 }
             });
         },
         bind: function (table) {
-            require(['datatables', 'dataTables-bootstrap'], function (dt) {
+            require(['datatables.net', 'dataTables-bootstrap'], function (dt) {
                 $(table).each(function (i) {
                     var e = $(this);
+                    e.DataTable();
+                    /*
                     e.DataTable({
                         "processing": true,
                         "serverSide": true,
@@ -322,6 +324,7 @@ define("core", function () {
                             }
                         }
                     });
+                    */
                 });
             });
         }
@@ -332,11 +335,9 @@ define("core", function () {
         link.type = "text/css";
         link.rel = "stylesheet";
         link.href = baseURL + url;
-        require(['datatables'], function (dt) {
-            if ($('link [href="' + baseURL + url + '"]').length === 0) {
-                document.getElementsByTagName("head")[0].appendChild(link);
-            }
-        });
+        if ($('link [href="' + baseURL + url + '"]').length === 0) {
+            document.getElementsByTagName("head")[0].appendChild(link);
+        }
     };
 
     return core;
