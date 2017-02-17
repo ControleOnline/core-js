@@ -8,11 +8,13 @@ define("core", function () {
         var config = {
             baseUrl: '/vendor',
             paths: {
-                'core': 'controleonline-core-js/dist/js/Core' + '?v=' + systemVersion,
+                'core': 'controleonline-core-js/dist/js/Core' + '?v=' + systemVersion,                
                 'jquery': 'jquery/dist/jquery.min' + '?v=' + systemVersion,
                 'lazyLoad': 'controleonline-core-js/dist/js/LazyLoad' + '?v=' + systemVersion,
                 'bootstrap': 'bootstrap/dist/js/bootstrap.min' + '?v=' + systemVersion,
+                'bootstrap-switch': 'bootstrap-switch/dist/js/bootstrap-switch.min' + '?v=' + systemVersion,
                 'datatables': 'datatables/media/js/jquery.dataTables.min' + '?v=' + systemVersion,
+                'dataTables-bootstrap': 'datatables/media/js/jquery.dataTables.bootstrap.min' + '?v=' + systemVersion,
                 'highcharts': 'highcharts/highcharts' + '?v=' + systemVersion,
                 'inputmask': 'jquery.inputmask/dist/min/inputmask/inputmask.min' + '?v=' + systemVersion,
                 'inputmask.dependencyLib': 'jquery.inputmask/dist/min/inputmask/inputmask.dependencyLib.jquery.min' + '?v=' + systemVersion,
@@ -23,7 +25,11 @@ define("core", function () {
                 'inputmask.regex.extensions': "jquery.inputmask/dist/min/inputmask/inputmask.regex.extensions.min" + '?v=' + systemVersion,
                 'jquery.inputmask': "jquery.inputmask/dist/min/inputmask/jquery.inputmask.min" + '?v=' + systemVersion,
                 'form-validator': 'jquery-form-validator/form-validator/jquery.form-validator.min' + '?v=' + systemVersion,
-
+                'match-height': 'matchHeight/jquery.matchHeight-min' + '?v=' + systemVersion,
+                'select2': 'select2/dist/js/select2.full.min' + '?v=' + systemVersion,
+                'ace': 'ace-builds/src/ace' + '?v=' + systemVersion,
+                'mode-html': 'ace-builds/src/mode-html' + '?v=' + systemVersion,
+                'theme-github': 'ace-builds/src/theme-github' + '?v=' + systemVersion,
             },
             shim: {
                 jquery: {
@@ -41,7 +47,7 @@ define("core", function () {
         require(['jquery'], function ($) {
             $(function () {
                 core.lazyLoad.init();
-                core.bootstrap.init();                
+                core.bootstrap.init();
                 core.ajax.init();
                 core.bind();
                 for (var k in appFiles) {
@@ -51,7 +57,6 @@ define("core", function () {
                         }
                     });
                 }
-
                 $('body').removeAttr('data-js-files');
             });
         });
@@ -304,7 +309,7 @@ define("core", function () {
             });
         },
         bind: function (table) {
-            require(['datatables'], function (dt) {
+            require(['datatables', 'dataTables-bootstrap'], function (dt) {
                 $(table).each(function (i) {
                     var e = $(this);
                     e.DataTable({
