@@ -29,15 +29,15 @@
   "authors": [
     "Luiz Kim <luizkim@gmail.com>"
   ],
-  "version": "1.4.0",
-  "_release": "1.4.0",
+  "version": "1.5.1",
+  "_release": "1.5.1",
   "_resolution": {
     "type": "version",
-    "tag": "v1.4.0",
-    "commit": "66cf42cdc6a833c0559013f04e0be3d76b5917a2"
+    "tag": "v1.5.1",
+    "commit": "5ee127fdc646e837e630dc8ff6c34855345063c0"
   },
   "_source": "https://github.com/ControleOnline/core-js.git",
-  "_target": "^1.4.0",
+  "_target": "^1.5.1",
   "_originalSource": "controleonline-core-js",
   "_direct": true
 }
