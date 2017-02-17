@@ -20,7 +20,8 @@
         "datatables": "*",
         "highcharts": "*",
         "jquery.inputmask":"*",
-        "jquery-form-validator":"*"
+        "jquery-form-validator":"*",
+        "flat-admin-bootstrap-templates": "*"                                
     },
      "keywords": [
         "ControleOnline"

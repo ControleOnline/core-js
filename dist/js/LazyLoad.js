@@ -13,11 +13,6 @@ define("lazyLoad", function () {
     lazyLoad.cache = [];
     lazyLoad.verify = null;
     lazyLoad.throttleTimer = new Date().getTime();
-    lazyLoad.__construct = (function () {
-        document.addEventListener("DOMContentLoaded", function () {
-            lazyLoad.init();
-        });
-    })();
     lazyLoad.forceLoadImages = function (selector) {
         /*
          * Example: lazyLoad.forceLoadImages('img[data-ll]');

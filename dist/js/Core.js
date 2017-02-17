@@ -38,21 +38,23 @@ define("core", function () {
     };
     core.init = function () {
         this.config();
-        this.bootstrap.init();
-        this.lazyLoad.init();
-        this.ajax.init();
-        this.bind();
-        for (var k in appFiles) {
-            require([k], function (appFile) {
-                if (typeof appFile.init === 'function') {
-                    appFile.init();
-                }
-            });
-        }
         require(['jquery'], function ($) {
-            $('body').removeAttr('data-js-files');
-        });
+            $(function () {
+                core.lazyLoad.init();
+                core.bootstrap.init();                
+                core.ajax.init();
+                core.bind();
+                for (var k in appFiles) {
+                    require([k], function (appFile) {
+                        if (typeof appFile.init === 'function') {
+                            appFile.init();
+                        }
+                    });
+                }
 
+                $('body').removeAttr('data-js-files');
+            });
+        });
     };
     core.ajax = {
         init: function () {
@@ -335,12 +337,5 @@ define("core", function () {
     return core;
 });
 require(['core'], function (core) {
-    if (document.readyState === "complete") {
-        core.init();
-    } else {
-        window.addEventListener("onload", function () {
-            core.init();
-        }, false);
-        //document.addEventListener("DOMContentLoaded", function () {/* code */}, false);
-    }
+    core.init();
 });
