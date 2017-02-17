@@ -21,7 +21,7 @@
         "highcharts": "*",
         "jquery.inputmask":"*",
         "jquery-form-validator":"*",
-        "flat-admin-bootstrap-templates": "*"                                
+        "flat-admin-bootstrap-templates": "dev-v3"                                
     },
      "keywords": [
         "ControleOnline"
