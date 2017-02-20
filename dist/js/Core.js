@@ -74,18 +74,17 @@ define("core", function () {
                             $(elem).prop("disabled", true);
                         } else {
                             var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
-                            loading += '<div class="modal-dialog">';
-                            loading += '<div class="modal-content">';
-                            loading += '<div class="modal-header" style="text-align: center">';
-                            loading += '<h3>Por favor aguarde</h3>';
+                            loading += '<div class="loading-dialog">';
+                            loading += '<div class="loading-content">';
+                            loading += '<div class="loading-header" style="text-align: center">';                            
                             loading += '</div>';
-                            loading += '<div class="modal-body" >';
-                            loading += '<div style="height:200px">';
-                            loading += '<i class="fa fa-spinner fa-6x fa-6 fa-spin" aria-hidden="true" style="font-size: 6em !important; position: absolute;display: block;top: 50%;left: 50%;margin-left: -50px;margin-top: -50px;"></i>';
+                            loading += '<div class="loading-body" >';
+                            loading += '<div>';
+                            loading += '<i class="fa fa-circle-o-notch fa-6x fa-6 fa-spin loading-spin" aria-hidden="true"></i>';                                                        
                             loading += '</div>';
                             loading += '</div>';
-                            loading += '<div class="modal-footer" style="text-align: center"></div>';
-                            loading += '</div>';
+                            loading += '<div class="loading-footer" style="text-align: center"></div>';
+                            loading += '</div>';                            
                             loading += '</div>';
                             loading += '</div>';
                             loading += '</div>';
