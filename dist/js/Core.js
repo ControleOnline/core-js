@@ -51,8 +51,8 @@ define("core", function () {
                 core.ajax.init();
                 core.bind();
                 for (var k in appFiles) {
-                    require([k], function (appFile) {
-                        if (typeof appFile.init === 'function') {
+                    require([k], function (appFile) {                        
+                        if (typeof appFile === 'object' && typeof appFile.init === 'function') {
                             appFile.init();
                         }
                     });
@@ -314,17 +314,17 @@ define("core", function () {
                     var e = $(this);
                     e.DataTable();
                     /*
-                    e.DataTable({
-                        "processing": true,
-                        "serverSide": true,
-                        "ajax": e.attr('data-source'),
-                        "rowCallback": function (row, data) {
-                            if ($.inArray(data.DT_RowId, selected) !== -1) {
-                                $(row).addClass('selected');
-                            }
-                        }
-                    });
-                    */
+                     e.DataTable({
+                     "processing": true,
+                     "serverSide": true,
+                     "ajax": e.attr('data-source'),
+                     "rowCallback": function (row, data) {
+                     if ($.inArray(data.DT_RowId, selected) !== -1) {
+                     $(row).addClass('selected');
+                     }
+                     }
+                     });
+                     */
                 });
             });
         }
