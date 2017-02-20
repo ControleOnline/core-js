@@ -49,10 +49,10 @@ define("core", function () {
                 core.lazyLoad.init();
                 core.bootstrap.init();
                 core.ajax.init();
-                core.bind();
-                for (var k in appFiles) {
+                core.bind();                
+                for (var k in appFiles) {                    
                     require([k], function (appFile) {
-                        if (typeof appFile === 'object' && typeof appFile.init === 'function') {
+                        if (typeof appFile === 'object' && typeof appFile.init === 'function') {                            
                             appFile.init();
                         }
                     });
