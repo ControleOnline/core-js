@@ -51,7 +51,7 @@ define("core", function () {
                 core.ajax.init();
                 core.bind();
                 for (var k in appFiles) {
-                    require([k], function (appFile) {                        
+                    require([k], function (appFile) {
                         if (typeof appFile === 'object' && typeof appFile.init === 'function') {
                             appFile.init();
                         }
@@ -105,6 +105,32 @@ define("core", function () {
                             $('#wait-modal').modal('hide');
                         }
                         core.show.result(data);
+                    },
+                    error: function (jqXHR, x, ajaxOptions, exception) {
+                        var message;
+                        var statusErrorMap = {
+                            '400': "Server understood the request, but request content was invalid.",
+                            '401': "Unauthorized access.",
+                            '403': "Forbidden resource can't be accessed.",
+                            '500': "Internal server error.",
+                            '503': "Service unavailable.",
+                            '404': "Page not found."
+                        };
+                        if (jqXHR.status) {
+                            message = statusErrorMap[jqXHR.status];
+                            if (!message) {
+                                message = "Unknown Error \n.";
+                            }
+                        } else if (exception == 'parsererror') {
+                            message = "Error.\nParsing JSON Request failed.";
+                        } else if (exception == 'timeout') {
+                            message = "Request Time out.";
+                        } else if (exception == 'abort') {
+                            message = "Request was aborted by the server";
+                        } else {
+                            message = "Unknown Error \n.";
+                        }
+                        core.show.error(message);
                     }
                 });
             });
@@ -141,36 +167,44 @@ define("core", function () {
                 } else {
                     core.show.error();
                 }
+            } else {
+                core.show.error();
             }
         },
         error: function (error) {
             require(['jquery'], function ($) {
                 error = error ? error : 'Nenhuma resposta';
                 var id = Date.now() / 1000 | 0;
-                var msg = '<div id="message-' + id + '" class="message-' + id + ' alert alert-danger fade in alert-dismissable">';
+                var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-danger fade in alert-dismissable">';
                 msg += '<strong>';
                 msg += error;
-                msg += '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>';
+                msg += '<button class="close">×</button>';
                 msg += '</strong>';
                 msg += '</div>';
                 $(msg).prependTo($('.show-messages'));
+                $(".message-" + id).slideDown(1000);
+
+                $(".message-" + id).on("click", "button.close", function () {
+                    $(this).parent().parent().slideUp(1000);
+                });
+
             });
         },
         success: function (success) {
             require(['jquery'], function ($) {
                 success = success ? success : 'Sucesso!';
                 var id = Date.now() / 1000 | 0;
-                var msg = '<div id="message-' + id + '" class="message-' + id + ' alert alert-success fade in alert-dismissable">';
+                var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-success fade in alert-dismissable">';
                 msg += '<strong>';
                 msg += success;
-                msg += '<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>';
+                msg += '<button class="close">×</button>';
                 msg += '</strong>';
                 msg += '</div>';
                 $(msg).prependTo($('.show-messages'));
-                $(".message-" + id).fadeTo(5000, 500).slideUp(500, function () {
-                    $(".message-" + id).slideUp(500);
+                $(".message-" + id).slideDown(1000).delay(3000).slideUp(1000);
+                $(".message-" + id).on("click", "button.close", function () {
+                    $(this).parent().parent().slideUp(1000);
                 });
-
             });
         }
     };
