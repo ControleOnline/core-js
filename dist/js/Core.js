@@ -27,7 +27,7 @@ define("core", function () {
                 'form-validator': 'jquery-form-validator/form-validator/jquery.form-validator.min.js' + '?v=' + systemVersion,
                 'match-height': 'matchHeight/jquery.matchHeight-min.js' + '?v=' + systemVersion,
                 'select2': 'select2/dist/js/select2.full.min.js' + '?v=' + systemVersion,
-                'ace': 'ace-builds/src/ace.js' + '?v=' + systemVersion,
+                'ace/ace': 'ace-builds/src/ace.js' + '?v=' + systemVersion,
                 'mode-html': 'ace-builds/src/mode-html.js' + '?v=' + systemVersion,
                 'theme-github': 'ace-builds/src/theme-github.js' + '?v=' + systemVersion,
             },
