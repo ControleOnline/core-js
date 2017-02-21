@@ -22,6 +22,9 @@ define("lazyLoad", function () {
             var imageNode = imageNodes[i];
             imageNode.src = imageNode.getAttribute('data-ll');
             imageNode.className = imageNode.className.replace(/(^|\s+)lazy-load(\s+|$)/, '$1lazy-loaded$2');
+            setTimeout(function () {
+                imageNode.className = imageNode.className.replace(/(^|\s+)lazy-loaded(\s+|$)/, '$1$2');
+            }, 1100);
         }
     };
     lazyLoad.addObservers = function () {
@@ -57,7 +60,10 @@ define("lazyLoad", function () {
             if ((imagePosition >= range.min - imageHeight) && (imagePosition <= range.max)) {
                 ll = image.getAttribute('data-ll');
                 image.onload = function () {
-                    this.className = this.className.replace(/(^|\s+)lazy-load(\s+|$)/, '$1lazy-loaded$2');
+                    image.className = image.className.replace(/(^|\s+)lazy-load(\s+|$)/, '$1lazy-loaded$2');
+                    setTimeout(function () {
+                        image.className = image.className.replace(/(^|\s+)lazy-loaded(\s+|$)/, '$1$2');
+                    }, 1100);
                 };
                 image.src = ll;
                 image.removeAttribute('data-ll');

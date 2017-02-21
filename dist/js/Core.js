@@ -38,7 +38,7 @@ define("core", function () {
             }
         };
         for (var k in appFiles) {
-            config.paths[k] = appFiles[k];
+            config.paths[k] = appFiles[k] + '.js?v=' + systemVersion;
         }
         require.config(config);
     };
@@ -49,10 +49,10 @@ define("core", function () {
                 core.lazyLoad.init();
                 core.bootstrap.init();
                 core.ajax.init();
-                core.bind();                
-                for (var k in appFiles) {                    
+                core.bind();
+                for (var k in appFiles) {
                     require([k], function (appFile) {
-                        if (typeof appFile === 'object' && typeof appFile.init === 'function') {                            
+                        if (typeof appFile === 'object' && typeof appFile.init === 'function') {
                             appFile.init();
                         }
                     });
@@ -76,15 +76,15 @@ define("core", function () {
                             var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
                             loading += '<div class="loading-dialog">';
                             loading += '<div class="loading-content">';
-                            loading += '<div class="loading-header" style="text-align: center">';                            
+                            loading += '<div class="loading-header" style="text-align: center">';
                             loading += '</div>';
                             loading += '<div class="loading-body" >';
                             loading += '<div>';
-                            loading += '<i class="fa fa-circle-o-notch fa-6x fa-6 fa-spin loading-spin" aria-hidden="true"></i>';                                                        
+                            loading += '<i class="fa fa-circle-o-notch fa-6x fa-6 fa-spin loading-spin" aria-hidden="true"></i>';
                             loading += '</div>';
                             loading += '</div>';
                             loading += '<div class="loading-footer" style="text-align: center"></div>';
-                            loading += '</div>';                            
+                            loading += '</div>';
                             loading += '</div>';
                             loading += '</div>';
                             loading += '</div>';
