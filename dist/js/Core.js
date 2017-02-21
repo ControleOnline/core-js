@@ -64,13 +64,13 @@ define("core", function () {
     core.ajax = {
         init: function () {
             require(['jquery'], function ($) {
-                var spin = '<i class="ajax-spin-save fa fa-spinner fa-spin"></i>';
+
                 $.ajaxSetup({
                     beforeSend: function () {
                         var elem = $('[data-clicked=true]');
-                        $(elem).attr('data-save');
+
                         if ($(elem).attr('data-save')) {
-                            $(elem).append(spin);
+                            $(elem).append(core.show.spin('ajax-spin-save'));
                             $(elem).prop("disabled", true);
                         } else {
                             var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
@@ -137,6 +137,9 @@ define("core", function () {
     };
 
     core.show = {
+        spin: function (cssClass) {
+            return '<i class="' + cssClass + ' ajax-spin fa fa-spinner fa-spin"></i>';
+        },
         result: function (data) {
             if (typeof data === 'object') {
                 if (data.responseJSON) {
@@ -269,7 +272,7 @@ define("core", function () {
                     require(['form-validator'], function () {
                         $.validate({
                             lang: userLanguage,
-                            modules: ['security', 'location'],
+                            modules: ['security', 'location']
                         });
                     });
                 }
