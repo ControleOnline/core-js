@@ -1,5 +1,6 @@
 define("core", function () {
     var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
+    var appLibs = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-libs'));
     var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
     var userLanguage = 'pt';
     var core = {};
@@ -7,36 +8,16 @@ define("core", function () {
     core.config = function () {
         var config = {
             baseUrl: '/vendor',
-            paths: {
-                'core': 'controleonline-core-js/dist/js/Core.js' + '?v=' + systemVersion,
-                'jquery': 'jquery/dist/jquery.min.js' + '?v=' + systemVersion,
-                'lazyLoad': 'controleonline-core-js/dist/js/LazyLoad.js' + '?v=' + systemVersion,
-                'bootstrap': 'bootstrap/dist/js/bootstrap.min.js' + '?v=' + systemVersion,
-                'bootstrap-switch': 'bootstrap-switch/dist/js/bootstrap-switch.min.js' + '?v=' + systemVersion,
-                'datatables.net': 'datatables/media/js/jquery.dataTables.min.js' + '?v=' + systemVersion,
-                'dataTables-bootstrap': 'datatables/media/js/dataTables.bootstrap4.min.js' + '?v=' + systemVersion,
-                'highcharts': 'highcharts/highcharts.js' + '?v=' + systemVersion,
-                'inputmask': 'jquery.inputmask/dist/min/inputmask/inputmask.min.js' + '?v=' + systemVersion,
-                'inputmask.dependencyLib': 'jquery.inputmask/dist/min/inputmask/inputmask.dependencyLib.jquery.min.js' + '?v=' + systemVersion,
-                'inputmask.extensions': 'jquery.inputmask/dist/min/inputmask/inputmask.extensions.min.js' + '?v=' + systemVersion,
-                'inputmask.date.extensions': 'jquery.inputmask/dist/min/inputmask/inputmask.date.extensions.min.js' + '?v=' + systemVersion,
-                'inputmask.numeric.extensions': 'jquery.inputmask/dist/min/inputmask/inputmask.numeric.extensions.min.js' + '?v=' + systemVersion,
-                'inputmask.phone.extensions': 'jquery.inputmask/dist/min/inputmask/inputmask.phone.extensions.min.js' + '?v=' + systemVersion,
-                'inputmask.regex.extensions': 'jquery.inputmask/dist/min/inputmask/inputmask.regex.extensions.min.js' + '?v=' + systemVersion,
-                'jquery.inputmask': 'jquery.inputmask/dist/min/inputmask/jquery.inputmask.min.js' + '?v=' + systemVersion,
-                'form-validator': 'jquery-form-validator/form-validator/jquery.form-validator.min.js' + '?v=' + systemVersion,
-                'match-height': 'matchHeight/jquery.matchHeight-min.js' + '?v=' + systemVersion,
-                'select2': 'select2/dist/js/select2.full.min.js' + '?v=' + systemVersion,
-                'ace/ace': 'ace-builds/src/ace.js' + '?v=' + systemVersion,
-                'mode-html': 'ace-builds/src/mode-html.js' + '?v=' + systemVersion,
-                'theme-github': 'ace-builds/src/theme-github.js' + '?v=' + systemVersion,
-            },
+            paths: {},
             shim: {
                 jquery: {
                     exports: "$"
                 }
             }
         };
+        for (var k in appLibs) {
+            config.paths[k] = appLibs[k] + '?v=' + systemVersion;
+        }
         for (var k in appFiles) {
             config.paths[k] = appFiles[k] + '.js?v=' + systemVersion;
         }
@@ -269,7 +250,7 @@ define("core", function () {
         init: function (selector) {
             require(['jquery'], function ($) {
                 if ($(selector).length) {
-                    require(['form-validator'], function () {
+                    require(['jquery-form-validator'], function () {
                         $.validate({
                             lang: userLanguage,
                             modules: ['security', 'location']

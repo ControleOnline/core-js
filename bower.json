@@ -2,7 +2,10 @@
   "directory" : "public/components",
   "name": "controleonline-core-js",
   "description": "Core of Controle Online Systems",
-  "main": "dist/js/Core.js",
+  "main": [
+      "dist/js/Core.js",      
+      "dist/css/Core.css"
+    ],
   "license": "BSD-3-Clause",
   "homepage": "http://controleonline.com",
   "ignore": [
