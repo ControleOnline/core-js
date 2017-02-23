@@ -3,8 +3,7 @@ define("core", function () {
     var appLibs = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-libs'));
     var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
     var userLanguage = document.querySelectorAll('html')[0].getAttribute('lang');
-    var core = {};
-    var interval = {};
+    var core = {};    
     core.config = function () {
         var config = {
             waitSeconds: 0,
@@ -44,7 +43,7 @@ define("core", function () {
             core.ajax.init();
             core.bind();
             Object.keys(appFiles).forEach(function (key) {
-                require([key], function (appFile) {
+                require([key], function (appFile) {                    
                     appFile.init();
                 });
             });
