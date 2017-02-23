@@ -2,11 +2,12 @@ define("core", function () {
     var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
     var appLibs = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-libs'));
     var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
-    var userLanguage = 'pt';
+    var userLanguage = document.querySelectorAll('html')[0].getAttribute('lang');
     var core = {};
 
     core.config = function () {
         var config = {
+            waitSeconds: 0,
             baseUrl: '/vendor',
             paths: {},
             shim: {
@@ -23,24 +24,31 @@ define("core", function () {
         }
         require.config(config);
     };
-    core.init = function () {
+    core.ready = function () {
         this.config();
         require(['jquery'], function ($) {
-            $(function () {
-                core.lazyLoad.init();
-                core.bootstrap.init();
-                core.ajax.init();
-                core.bind();
-                for (var k in appFiles) {
-                    require([k], function (appFile) {
-                        if (typeof appFile === 'object' && typeof appFile.init === 'function') {
-                            appFile.init();
-                        }
-                    });
-                }
-                $('body').removeAttr('data-js-files');
+            if ($.isReady) {
+                core.init();
+            }
+            $(document).ready(function () {
+                core.init();
             });
         });
+    };
+    core.init = function () {
+        $('body').removeAttr('data-js-files');
+        $('body').removeAttr('data-js-libs');
+        core.lazyLoad.init();
+        core.bootstrap.init();
+        core.ajax.init();
+        core.bind();        
+        for (var k in appFiles) {
+            require([k], function (appFile) {                
+                if (typeof appFile === 'object' && typeof appFile.init === 'function') {
+                    appFile.init();
+                }
+            });
+        }
     };
     core.ajax = {
         init: function () {
@@ -193,19 +201,17 @@ define("core", function () {
     };
     core.bind = function (selector) {
         require(['jquery'], function ($) {
-            $(function () {
-                selector = selector ? selector : '*';
-                core.crud.init.add($(selector).find("[data-add]"));
-                core.crud.init.save($(selector).find("[data-save]"));
-                core.formValidator.init($(selector).find("[data-validation]"));
-                //core.inputMask.init.mask($(selector).find("[data-mask]"));
-                //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
-                core.dataTables.init($(selector).find('.datatable'));
+            selector = selector ? selector : '*';
+            core.crud.init.add($(selector).find("[data-add]"));
+            core.crud.init.save($(selector).find("[data-save]"));
+            core.formValidator.init($(selector).find("[data-validation]"));
+            //core.inputMask.init.mask($(selector).find("[data-mask]"));
+            //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
+            core.dataTables.init($(selector).find('.datatable'));
 
-                $(selector).find("*").click(function (e) {
-                    $("*").removeAttr('data-clicked');
-                    $(e.target).attr("data-clicked", true);
-                });
+            $(selector).find("*").click(function (e) {
+                $("*").removeAttr('data-clicked');
+                $(e.target).attr("data-clicked", true);
             });
         });
     };
@@ -360,5 +366,5 @@ define("core", function () {
     return core;
 });
 require(['core'], function (core) {
-    core.init();
+    core.ready();
 });
