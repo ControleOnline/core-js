@@ -4,7 +4,7 @@ define("core", function () {
     var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
     var userLanguage = document.querySelectorAll('html')[0].getAttribute('lang');
     var core = {};
-
+    var interval = {};
     core.config = function () {
         var config = {
             waitSeconds: 0,
@@ -16,48 +16,46 @@ define("core", function () {
                 }
             }
         };
-        for (var k in appLibs) {
-            config.paths[k] = appLibs[k] + '?v=' + systemVersion;
-        }
-        for (var k in appFiles) {
-            config.paths[k] = appFiles[k] + '.js?v=' + systemVersion;
-        }
+        Object.keys(appLibs).forEach(function (key) {
+            config.paths[key] = appLibs[key] + '?v=' + systemVersion;
+        });
+        Object.keys(appFiles).forEach(function (key) {
+            config.paths[key] = appFiles[key] + '.js?v=' + systemVersion;
+        });
         require.config(config);
     };
     core.ready = function () {
         this.config();
         require(['jquery'], function ($) {
             if ($.isReady) {
-                core.init();
+                core.load.modules();
             }
             $(document).ready(function () {
-                core.init();
+                core.load.modules();
             });
         });
     };
-    core.init = function () {
-        $('body').removeAttr('data-js-files');
-        $('body').removeAttr('data-js-libs');
-        core.lazyLoad.init();
-        core.bootstrap.init();
-        core.ajax.init();
-        core.bind();        
-        for (var k in appFiles) {
-            require([k], function (appFile) {                
-                if (typeof appFile === 'object' && typeof appFile.init === 'function') {
+    core.load = {
+        modules: function () {
+            $('body').removeAttr('data-js-files');
+            $('body').removeAttr('data-js-libs');
+            core.lazyLoad.init();
+            core.bootstrap.init();
+            core.ajax.init();
+            core.bind();
+            Object.keys(appFiles).forEach(function (key) {
+                require([key], function (appFile) {
                     appFile.init();
-                }
+                });
             });
         }
     };
     core.ajax = {
         init: function () {
             require(['jquery'], function ($) {
-
                 $.ajaxSetup({
                     beforeSend: function () {
                         var elem = $('[data-clicked=true]');
-
                         if ($(elem).attr('data-save')) {
                             $(elem).append(core.show.spin('ajax-spin-save'));
                             $(elem).prop("disabled", true);
@@ -124,7 +122,6 @@ define("core", function () {
             });
         }
     };
-
     core.show = {
         spin: function (cssClass) {
             return '<i class="' + cssClass + ' ajax-spin fa fa-spinner fa-spin"></i>';
@@ -174,11 +171,9 @@ define("core", function () {
                 msg += '</div>';
                 $(msg).prependTo($('.show-messages'));
                 $(".message-" + id).slideDown(1000);
-
                 $(".message-" + id).on("click", "button.close", function () {
                     $(this).parent().parent().slideUp(1000);
                 });
-
             });
         },
         success: function (success) {
@@ -208,15 +203,12 @@ define("core", function () {
             //core.inputMask.init.mask($(selector).find("[data-mask]"));
             //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
             core.dataTables.init($(selector).find('.datatable'));
-
             $(selector).find("*").click(function (e) {
                 $("*").removeAttr('data-clicked');
                 $(e.target).attr("data-clicked", true);
             });
         });
     };
-
-
     core.crud = {
         init: {
             add: function (selector) {
@@ -362,7 +354,6 @@ define("core", function () {
             document.getElementsByTagName("head")[0].appendChild(link);
         }
     };
-
     return core;
 });
 require(['core'], function (core) {
