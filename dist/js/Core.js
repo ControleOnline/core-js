@@ -1,9 +1,10 @@
 define("core", function () {
-    var appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
-    var appLibs = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-libs'));
-    var systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
-    var userLanguage = document.querySelectorAll('html')[0].getAttribute('lang');
-    var core = {};    
+    var core = {};
+    core.appFiles = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-files'));
+    core.appLibs = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-libs'));
+    core.userLanguage = document.querySelectorAll('html')[0].getAttribute('lang');
+    core.systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
+
     core.config = function () {
         var config = {
             waitSeconds: 0,
@@ -15,11 +16,11 @@ define("core", function () {
                 }
             }
         };
-        Object.keys(appLibs).forEach(function (key) {
-            config.paths[key] = appLibs[key] + '?v=' + systemVersion;
+        Object.keys(core.appLibs).forEach(function (key) {
+            config.paths[key] = core.appLibs[key] + '?v=' + core.systemVersion;
         });
-        Object.keys(appFiles).forEach(function (key) {
-            config.paths[key] = appFiles[key] + '.js?v=' + systemVersion;
+        Object.keys(core.appFiles).forEach(function (key) {
+            config.paths[key] = core.appFiles[key] + '.js?v=' + core.systemVersion;
         });
         require.config(config);
     };
@@ -36,88 +37,87 @@ define("core", function () {
     };
     core.load = {
         modules: function () {
-            $('body').removeAttr('data-js-files');
-            $('body').removeAttr('data-js-libs');
+            $('body').removeAttr('data-js-files data-js-libs');
             core.lazyLoad.init();
             core.bootstrap.init();
             core.ajax.init();
             core.bind();
-            Object.keys(appFiles).forEach(function (key) {
-                require([key], function (appFile) {                    
-                    appFile.init();
+            Object.keys(core.appFiles).forEach(function (key) {
+                require([key], function (appFile) {
+                    if (typeof appFile.init === 'function') {
+                        appFile.init();
+                    }
                 });
             });
         }
     };
     core.ajax = {
         init: function () {
-            require(['jquery'], function ($) {
-                $.ajaxSetup({
-                    beforeSend: function () {
-                        var elem = $('[data-clicked=true]');
-                        if ($(elem).attr('data-save')) {
-                            $(elem).append(core.show.spin('ajax-spin-save'));
-                            $(elem).prop("disabled", true);
-                        } else {
-                            var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
-                            loading += '<div class="loading-dialog">';
-                            loading += '<div class="loading-content">';
-                            loading += '<div class="loading-header" style="text-align: center">';
-                            loading += '</div>';
-                            loading += '<div class="loading-body" >';
-                            loading += '<div>';
-                            loading += '<i class="fa fa-circle-o-notch fa-6x fa-6 fa-spin loading-spin" aria-hidden="true"></i>';
-                            loading += '</div>';
-                            loading += '</div>';
-                            loading += '<div class="loading-footer" style="text-align: center"></div>';
-                            loading += '</div>';
-                            loading += '</div>';
-                            loading += '</div>';
-                            loading += '</div>';
-                            if (!$('body').find('#wait-modal').length) {
-                                $('body').append(loading);
-                            }
-                            $('#wait-modal').modal('show');
+            $.ajaxSetup({
+                beforeSend: function () {
+                    var elem = $('[data-clicked=true]');
+                    if ($(elem).attr('data-save')) {
+                        $(elem).append(core.show.spin('ajax-spin-save'));
+                        $(elem).prop("disabled", true);
+                    } else {
+                        var loading = '<div id="wait-modal" class="modal fade" tabindex="-1" role="dialog" data-keyboard="false"  data-backdrop="static">';
+                        loading += '<div class="loading-dialog">';
+                        loading += '<div class="loading-content">';
+                        loading += '<div class="loading-header" style="text-align: center">';
+                        loading += '</div>';
+                        loading += '<div class="loading-body" >';
+                        loading += '<div>';
+                        loading += '<i class="fa fa-circle-o-notch fa-6x fa-6 fa-spin loading-spin" aria-hidden="true"></i>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        loading += '<div class="loading-footer" style="text-align: center"></div>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        loading += '</div>';
+                        if (!$('body').find('#wait-modal').length) {
+                            $('body').append(loading);
                         }
-                    },
-                    complete: function (data) {
-                        var elem = $('[data-clicked=true]');
-                        $(elem).attr('data-save');
-                        if ($(elem).attr('data-save')) {
-                            $(elem).find('.ajax-spin-save').remove();
-                            $(elem).prop("disabled", false);
-                        } else {
-                            $('#wait-modal').modal('hide');
-                        }
-                        core.show.result(data);
-                    },
-                    error: function (jqXHR, x, ajaxOptions, exception) {
-                        var message;
-                        var statusErrorMap = {
-                            '400': "Server understood the request, but request content was invalid.",
-                            '401': "Unauthorized access.",
-                            '403': "Forbidden resource can't be accessed.",
-                            '500': "Internal server error.",
-                            '503': "Service unavailable.",
-                            '404': "Page not found."
-                        };
-                        if (jqXHR.status) {
-                            message = statusErrorMap[jqXHR.status];
-                            if (!message) {
-                                message = "Unknown Error \n.";
-                            }
-                        } else if (exception == 'parsererror') {
-                            message = "Error.\nParsing JSON Request failed.";
-                        } else if (exception == 'timeout') {
-                            message = "Request Time out.";
-                        } else if (exception == 'abort') {
-                            message = "Request was aborted by the server";
-                        } else {
+                        $('#wait-modal').modal('show');
+                    }
+                },
+                complete: function (data) {
+                    var elem = $('[data-clicked=true]');
+                    $(elem).attr('data-save');
+                    if ($(elem).attr('data-save')) {
+                        $(elem).find('.ajax-spin-save').remove();
+                        $(elem).prop("disabled", false);
+                    } else {
+                        $('#wait-modal').modal('hide');
+                    }
+                    core.show.result(data);
+                },
+                error: function (jqXHR, x, ajaxOptions, exception) {
+                    var message;
+                    var statusErrorMap = {
+                        '400': "Server understood the request, but request content was invalid.",
+                        '401': "Unauthorized access.",
+                        '403': "Forbidden resource can't be accessed.",
+                        '500': "Internal server error.",
+                        '503': "Service unavailable.",
+                        '404': "Page not found."
+                    };
+                    if (jqXHR.status) {
+                        message = statusErrorMap[jqXHR.status];
+                        if (!message) {
                             message = "Unknown Error \n.";
                         }
-                        core.show.error(message);
+                    } else if (exception == 'parsererror') {
+                        message = "Error.\nParsing JSON Request failed.";
+                    } else if (exception == 'timeout') {
+                        message = "Request Time out.";
+                    } else if (exception == 'abort') {
+                        message = "Request was aborted by the server";
+                    } else {
+                        message = "Unknown Error \n.";
                     }
-                });
+                    core.show.error(message);
+                }
             });
         }
     };
@@ -159,116 +159,142 @@ define("core", function () {
             }
         },
         error: function (error) {
-            require(['jquery'], function ($) {
-                error = error ? error : 'Nenhuma resposta';
-                var id = Date.now() / 1000 | 0;
-                var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-danger fade in alert-dismissable">';
-                msg += '<strong>';
-                msg += error;
-                msg += '<button class="close">×</button>';
-                msg += '</strong>';
-                msg += '</div>';
-                $(msg).prependTo($('.show-messages'));
-                $(".message-" + id).slideDown(1000);
-                $(".message-" + id).on("click", "button.close", function () {
-                    $(this).parent().parent().slideUp(1000);
+            error = error ? error : 'Nenhuma resposta';
+            if (typeof error === 'object') {
+                $.each(error, function (key, value) {
+                    core.show.error(value.message ? value.message : value);
                 });
+                return;
+            }
+
+            var id = Date.now() / 1000 | 0;
+            var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-danger fade in alert-dismissable">';
+            msg += '<strong>';
+            msg += error;
+            msg += '<button class="close">×</button>';
+            msg += '</strong>';
+            msg += '</div>';
+            $(msg).prependTo($('.show-messages'));
+            $(".message-" + id).slideDown(1000).delay(10000).slideUp(1000);
+            $(".message-" + id).on("click", "button.close", function () {
+                $(this).parent().parent().slideUp(1000);
             });
         },
         success: function (success) {
-            require(['jquery'], function ($) {
-                success = success ? success : 'Sucesso!';
-                var id = Date.now() / 1000 | 0;
-                var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-success fade in alert-dismissable">';
-                msg += '<strong>';
-                msg += success;
-                msg += '<button class="close">×</button>';
-                msg += '</strong>';
-                msg += '</div>';
-                $(msg).prependTo($('.show-messages'));
-                $(".message-" + id).slideDown(1000).delay(3000).slideUp(1000);
-                $(".message-" + id).on("click", "button.close", function () {
-                    $(this).parent().parent().slideUp(1000);
+            success = success ? success : 'Sucesso!';
+            if (typeof success === 'object') {
+                $.each(success, function (key, value) {
+                    core.show.success(value.message ? value.message : value);
                 });
+                return;
+            }
+            var id = Date.now() / 1000 | 0;
+            var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-success fade in alert-dismissable">';
+            msg += '<strong>';
+            msg += success;
+            msg += '<button class="close">×</button>';
+            msg += '</strong>';
+            msg += '</div>';
+            $(msg).prependTo($('.show-messages'));
+            $(".message-" + id).slideDown(1000).delay(3000).slideUp(1000);
+            $(".message-" + id).on("click", "button.close", function () {
+                $(this).parent().parent().slideUp(1000);
             });
         }
     };
     core.bind = function (selector) {
-        require(['jquery'], function ($) {
-            selector = selector ? selector : '*';
-            core.crud.init.add($(selector).find("[data-add]"));
-            core.crud.init.save($(selector).find("[data-save]"));
-            core.formValidator.init($(selector).find("[data-validation]"));
-            //core.inputMask.init.mask($(selector).find("[data-mask]"));
-            //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
-            core.dataTables.init($(selector).find('.datatable'));
-            $(selector).find("*").click(function (e) {
-                $("*").removeAttr('data-clicked');
-                $(e.target).attr("data-clicked", true);
-            });
+        selector = selector ? selector : '*';
+        core.crud.init.add($(selector).find("[data-add]"));
+        core.crud.init.save($(selector).find("[data-save]"));
+        core.formValidator.init($(selector).find("[data-validation]").closest('form'));
+        //core.inputMask.init.mask($(selector).find("[data-mask]"));
+        //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
+        core.dataTables.init($(selector).find('.datatable'));
+        $(selector).find("*").click(function (e) {
+            $("*").removeAttr('data-clicked');
+            $(e.target).attr("data-clicked", true);
         });
     };
     core.crud = {
         init: {
             add: function (selector) {
-                require(['jquery'], function ($) {
-                    if ($(selector).length) {
-                        $(selector).each(function () {
-                            $(this).click(function (e) {
-                                e.preventDefault();
-                                $.ajax({
-                                    url: $(selector).data('add'),
-                                    context: document.body
-                                });
-                            });
-                        });
-                    }
-                });
-            },
-            save: function (selector) {
-                require(['jquery'], function ($) {
-                    if ($(selector).length) {
-                        $(selector).each(function () {
-                            $(this).click(function (e) {
-                                e.preventDefault();
-                                $.ajax({
-                                    url: $(selector).data('save'),
-                                    method: 'POST',
-                                    dataType: 'json'
-                                });
-                            });
-                        });
-                    }
-                });
-            }
-        }
-    };
-    core.formValidator = {
-        init: function (selector) {
-            require(['jquery'], function ($) {
                 if ($(selector).length) {
-                    require(['jquery-form-validator'], function () {
-                        $.validate({
-                            lang: userLanguage,
-                            modules: ['security', 'location']
+                    $(selector).each(function () {
+                        $(this).click(function (e) {
+                            e.preventDefault();
+                            $.ajax({
+                                url: $(selector).data('add'),
+                                context: document.body
+                            });
                         });
                     });
                 }
+            },
+            save: function (selector) {
+                if ($(selector).length) {
+                    $(selector).each(function () {
+                        $(this).click(function (e) {
+                            e.preventDefault();
+                            $.ajax({
+                                url: $(selector).data('save'),
+                                method: 'POST',
+                                dataType: 'json'
+                            });
+                        });
+                    });
+                }
+            }
+        }
+    };
+
+
+    core.formValidator = {
+        init: function (selector) {
+            if ($(selector).length) {
+                require(['jquery', 'jquery-form-validator'], function ($) {
+                    core.formValidator.validateForm(selector);
+                });
+            }
+        },
+        config: function (form) {
+            var config = {
+                lang: core.userLanguage,
+                modules: ['security', 'location'],
+                form: form ? form : false
+            };
+            return config;
+        },
+        customValidators: function () {
+            $.formUtils.addValidator({
+                name: 'user_exists',
+                validatorFunction: function (value, $el, config, language, $form) {
+                    return true;
+//                    var user_exists = $($el).data('user-exists');                                        
+//                    return user_exists === 'true' || user_exists === undefined;
+                },
+                errorMessage: 'User not found',
+                errorMessageKey: 'badUserExists'
             });
+
+        },
+        validateForm: function (selector) {
+            core.formValidator.customValidators();
+            var config = core.formValidator.config(selector);
+            $.validate(config);
         }
     };
     core.inputMask = {
         init: {
             mask: function (selector) {
-                require(['jquery'], function ($) {
-                    if ($(selector).length) {
-                        require(['inputmask', 'jquery.inputmask'], function () {
-                            $(selector).each(function () {
-                                $(this).inputmask(eval($(this).data('mask')));
-                            });
+
+                if ($(selector).length) {
+                    require(['inputmask', 'jquery.inputmask'], function () {
+                        $(selector).each(function () {
+                            $(this).inputmask(eval($(this).data('mask')));
                         });
-                    }
-                });
+                    });
+                }
+
             },
             maskRegex: function (selector) {
                 /*
@@ -283,44 +309,36 @@ define("core", function () {
                  }
                  });
                  */
-                require(['jquery'], function ($) {
-                    if ($(selector).length) {
-                        require(['inputmask', 'jquery.inputmask', 'inputmask.regex.extensions'], function () {
-                            $(selector).each(function () {
-                                $(this).inputmask('Regex', eval($(this).data('mask-regex')));
-                            });
+                if ($(selector).length) {
+                    require(['inputmask', 'jquery.inputmask', 'inputmask.regex.extensions'], function () {
+                        $(selector).each(function () {
+                            $(this).inputmask('Regex', eval($(this).data('mask-regex')));
                         });
-                    }
-                });
+                    });
+                }
             }
         }
     };
     core.bootstrap = {
         init: function () {
-            require(['jquery'], function () {
-                require(['bootstrap']);
-            });
+            require(['bootstrap']);
         }
     };
     core.lazyLoad = {
-        init: function () {
-            require(['jquery'], function ($) {
+        init: function () {            
                 if ($('[data-ll]').length) {
                     require(['lazyLoad'], function (lazyLoad) {
                         lazyLoad.init();
                     });
-                }
-            });
+                }            
         }
     };
     core.dataTables = {
-        init: function (selector) {
-            require(['jquery'], function ($) {
+        init: function (selector) {            
                 if ($(selector).length) {
                     //core.loadCss('datatables/media/css/jquery.dataTables.min.css');
                     core.dataTables.bind(selector);
-                }
-            });
+                }            
         },
         bind: function (table) {
             require(['datatables.net', 'dataTables-bootstrap'], function (dt) {
