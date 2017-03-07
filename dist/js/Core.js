@@ -24,6 +24,12 @@ define("core", function () {
         });
         require.config(config);
     };
+    core.guid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
     core.ready = function () {
         this.config();
         require(['jquery'], function ($) {
@@ -166,8 +172,7 @@ define("core", function () {
                 });
                 return;
             }
-
-            var id = Date.now() / 1000 | 0;
+            var id = core.guid();
             var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-danger fade in alert-dismissable">';
             msg += '<strong>';
             msg += error;
@@ -188,7 +193,7 @@ define("core", function () {
                 });
                 return;
             }
-            var id = Date.now() / 1000 | 0;
+            var id = core.guid();
             var msg = '<div style="display:none" id="message-' + id + '" class="message-' + id + ' alert alert-success fade in alert-dismissable">';
             msg += '<strong>';
             msg += success;
@@ -325,20 +330,20 @@ define("core", function () {
         }
     };
     core.lazyLoad = {
-        init: function () {            
-                if ($('[data-ll]').length) {
-                    require(['lazyLoad'], function (lazyLoad) {
-                        lazyLoad.init();
-                    });
-                }            
+        init: function () {
+            if ($('[data-ll]').length) {
+                require(['lazyLoad'], function (lazyLoad) {
+                    lazyLoad.init();
+                });
+            }
         }
     };
     core.dataTables = {
-        init: function (selector) {            
-                if ($(selector).length) {
-                    //core.loadCss('datatables/media/css/jquery.dataTables.min.css');
-                    core.dataTables.bind(selector);
-                }            
+        init: function (selector) {
+            if ($(selector).length) {
+                //core.loadCss('datatables/media/css/jquery.dataTables.min.css');
+                core.dataTables.bind(selector);
+            }
         },
         bind: function (table) {
             require(['datatables.net', 'dataTables-bootstrap'], function (dt) {
