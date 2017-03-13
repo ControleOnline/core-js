@@ -84,7 +84,10 @@ define("core", function () {
                         if (!$('body').find('#wait-modal').length) {
                             $('body').append(loading);
                         }
-                        $('#wait-modal').modal('show');
+                        require(['jquery'], function ($) {
+
+                            $('#wait-modal').modal('show');
+                        });
                     }
                 },
                 complete: function (data) {
@@ -94,7 +97,9 @@ define("core", function () {
                         $(elem).find('.ajax-spin-save').remove();
                         $(elem).prop("disabled", false);
                     } else {
-                        $('#wait-modal').modal('hide');
+                        require(['jquery'], function ($) {
+                            $('#wait-modal').modal('hide');
+                        });
                     }
                     core.show.result(data);
                 },
@@ -341,7 +346,7 @@ define("core", function () {
     core.dataTables = {
         init: function (selector) {
             if ($(selector).length) {
-                //core.loadCss('datatables/media/css/jquery.dataTables.min.css');
+                core.loadCss('datatables/media/css/dataTables.bootstrap4.min.css');
                 core.dataTables.bind(selector);
             }
         },
@@ -349,19 +354,36 @@ define("core", function () {
             require(['datatables.net', 'dataTables-bootstrap'], function (dt) {
                 $(table).each(function (i) {
                     var e = $(this);
-                    e.DataTable();
-                    /*
-                     e.DataTable({
-                     "processing": true,
-                     "serverSide": true,
-                     "ajax": e.attr('data-source'),
-                     "rowCallback": function (row, data) {
-                     if ($.inArray(data.DT_RowId, selected) !== -1) {
-                     $(row).addClass('selected');
-                     }
-                     }
-                     });
-                     */
+//                    e.DataTable({language: {
+//                            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Portuguese-Brasil.json"
+//                        }});
+//                    
+
+                    //https://datatables.net/examples/ajax/custom_data_property.html
+                    //https://datatables.net/examples/server_side/custom_vars.html
+
+                    e.DataTable({
+                        language: {
+                            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Portuguese-Brasil.json"
+                        },
+                        processing: true,
+                        serverSide: true,
+                        ajax: {
+                            url: '/assets/teste.json', //e.attr('data-source')
+                            //dataSrc: "demo",
+//                            data: function (d) {
+//                                d.myKey = "myValue";
+//                                // d.custom = $('#myInput').val();
+//                                // etc
+//                            }
+                        },
+//                        "rowCallback": function (row, data) {
+//                            if ($.inArray(data.DT_RowId, selected) !== -1) {
+//                                $(row).addClass('selected');
+//                            }
+//                        }
+                    });
+
                 });
             });
         }
