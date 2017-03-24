@@ -4,7 +4,6 @@ define("core", function () {
     core.appLibs = JSON.parse(document.querySelectorAll('body')[0].getAttribute('data-js-libs'));
     core.userLanguage = document.querySelectorAll('html')[0].getAttribute('lang');
     core.systemVersion = document.querySelectorAll('[system-version]')[0].getAttribute('system-version');
-
     core.config = function () {
         var config = {
             waitSeconds: 0,
@@ -61,8 +60,15 @@ define("core", function () {
         init: function () {
             $.ajaxSetup({
                 beforeSend: function () {
+
                     var elem = $('[data-clicked=true]');
-                    if ($(elem).attr('data-save')) {
+                    if ($(elem).attr('data-add')) {
+                        $(elem).append(core.show.spin('ajax-spin-add'));
+                        $(elem).prop("disabled", true);
+                    } else if ($(elem).attr('data-delete')) {
+                        $(elem).append(core.show.spin('ajax-spin-delete'));
+                        $(elem).prop("disabled", true);
+                    } else if ($(elem).attr('data-save')) {
                         $(elem).append(core.show.spin('ajax-spin-save'));
                         $(elem).prop("disabled", true);
                     } else {
@@ -71,7 +77,7 @@ define("core", function () {
                         loading += '<div class="loading-content">';
                         loading += '<div class="loading-header" style="text-align: center">';
                         loading += '</div>';
-                        loading += '<div class="loading-body" >';
+                        loading += '<div class="loading-body">';
                         loading += '<div>';
                         loading += '<i class="fa fa-circle-o-notch fa-6x fa-6 fa-spin loading-spin" aria-hidden="true"></i>';
                         loading += '</div>';
@@ -84,23 +90,26 @@ define("core", function () {
                         if (!$('body').find('#wait-modal').length) {
                             $('body').append(loading);
                         }
-                        require(['jquery'], function ($) {
-
+                        require(['jquery', 'bootstrap'], function ($) {
                             $('#wait-modal').modal('show');
                         });
                     }
                 },
                 complete: function (data) {
                     var elem = $('[data-clicked=true]');
-                    $(elem).attr('data-save');
-                    if ($(elem).attr('data-save')) {
+                    if ($(elem).attr('data-add')) {
+                        $(elem).find('.ajax-spin-add').remove();
+                        $(elem).prop("disabled", false);
+                    } else if ($(elem).attr('data-delete')) {
+                        $(elem).find('.ajax-spin-delete').remove();
+                        $(elem).prop("disabled", false);
+                    } else if ($(elem).attr('data-save')) {
                         $(elem).find('.ajax-spin-save').remove();
                         $(elem).prop("disabled", false);
-                    } else {
-                        require(['jquery'], function ($) {
-                            $('#wait-modal').modal('hide');
-                        });
                     }
+                    require(['jquery'], function ($) {
+                        $('#wait-modal,#confirm-delete').modal('hide');
+                    });
                     core.show.result(data);
                 },
                 error: function (jqXHR, x, ajaxOptions, exception) {
@@ -163,7 +172,7 @@ define("core", function () {
                         core.bind('#' + id);
                     }
                 } else {
-                    core.show.error();
+                    core.show.error((data.response && data.response.error) ? data.response.error : null);
                 }
             } else {
                 core.show.error();
@@ -185,9 +194,13 @@ define("core", function () {
             msg += '</strong>';
             msg += '</div>';
             $(msg).prependTo($('.show-messages'));
-            $(".message-" + id).slideDown(1000).delay(10000).slideUp(1000);
-            $(".message-" + id).on("click", "button.close", function () {
-                $(this).parent().parent().slideUp(1000);
+            $(".message-" + id).slideDown(1000).delay(10000).slideUp(1000, function () {
+                $(".message-" + id).remove();
+            });
+            $(".message-" + id).find(".close").on("click", function () {
+                $(".message-" + id).stop(true, true).slideUp(1000, function () {
+                    $(".message-" + id).delay(2000).remove();
+                });
             });
         },
         success: function (success) {
@@ -206,16 +219,22 @@ define("core", function () {
             msg += '</strong>';
             msg += '</div>';
             $(msg).prependTo($('.show-messages'));
-            $(".message-" + id).slideDown(1000).delay(3000).slideUp(1000);
-            $(".message-" + id).on("click", "button.close", function () {
-                $(this).parent().parent().slideUp(1000);
+            $(".message-" + id).slideDown(1000).delay(3000).slideUp(1000, function () {
+                $(".message-" + id).remove();
+            });
+            $(".message-" + id).find(".close").on("click", function () {
+                $(".message-" + id).stop(true, true).slideUp(1000, function () {
+                    $(".message-" + id).delay(2000).remove();
+                });
             });
         }
     };
     core.bind = function (selector) {
         selector = selector ? selector : '*';
         core.crud.init.add($(selector).find("[data-add]"));
+        core.crud.init.addForm($(selector).find("[data-add-form]"));
         core.crud.init.save($(selector).find("[data-save]"));
+        core.crud.init.deleteConfirm($(selector).find("[data-delete-confirm]"));
         core.formValidator.init($(selector).find("[data-validation]").closest('form'));
         //core.inputMask.init.mask($(selector).find("[data-mask]"));
         //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
@@ -227,15 +246,99 @@ define("core", function () {
     };
     core.crud = {
         init: {
+            deleteConfirm: function (selector) {
+                if ($(selector).length) {
+                    $(selector).each(function () {
+                        $(this).click(function (e) {
+                            e.preventDefault();
+                            core.crud.init.deleteModal($(this));
+                        });
+                    });
+                }
+            },
+            deleteModal: function (selector) {
+                if ($(selector).length) {
+                    $('#confirm-delete').remove();
+                    var delete_modal = '<div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-hidden="true">';
+                    delete_modal += '<div class="modal-dialog">';
+                    delete_modal += '<div class="modal-content">';
+                    delete_modal += '<div class="modal-header">';
+                    delete_modal += $(selector).data('header');
+                    delete_modal += '</div>';
+                    delete_modal += '<div class="modal-body">';
+                    delete_modal += $(selector).data('body');
+                    delete_modal += '</div>';
+                    delete_modal += '<div class="modal-footer">';
+                    delete_modal += '<button type="button" class="btn btn-default" data-dismiss="modal">' + $(selector).data('calcel-name') + '</button>';
+                    delete_modal += '<button data-id="' + $(selector).data('id') + '" data-delete="' + $(selector).data('delete-confirm') + '" name="delete-' + $(selector).data('id') + '" id="delete-' + $(selector).data('id') + '" type="button" class="delete btn btn-danger btn-ok">';
+                    delete_modal += $(selector).data('delete-name');
+                    delete_modal += '</button>';
+                    delete_modal += '</div>';
+                    delete_modal += '</div>';
+                    delete_modal += '</div>';
+                    delete_modal += '</div>';
+                    $('body').append(delete_modal);
+                    core.crud.init.delete($('body').find("[data-delete]"));
+                }
+            },
+            delete: function (selector) {
+                if ($(selector).length) {
+                    $(selector).each(function () {
+                        $(this).click(function (e) {
+                            e.preventDefault();
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: $(selector).data('delete'),
+                                    data: {
+                                        id: $(selector).data('id')
+                                    },
+                                    method: 'POST',
+                                    dataType: 'json',
+                                    success: function (data, textStatus, jqXHR) {
+                                        if (data.response && data.response.success) {
+                                            $('#container-' + $(selector).attr('id')).fadeOut(1000);
+                                        }
+                                    }
+                                });
+                            }, 100);
+                        });
+                    });
+                }
+            },
+            addForm: function (selector) {
+                if ($(selector).length) {
+                    $(selector).each(function () {
+                        $(this).click(function (e) {
+                            e.preventDefault();
+                            setTimeout(function () {
+                                $.ajax({
+                                    cache: true,
+                                    url: $(selector).data('add-form'),
+                                    context: document.body
+                                });
+                            }, 100);
+                        });
+                    });
+                }
+            },
             add: function (selector) {
                 if ($(selector).length) {
                     $(selector).each(function () {
                         $(this).click(function (e) {
                             e.preventDefault();
-                            $.ajax({
-                                url: $(selector).data('add'),
-                                context: document.body
-                            });
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: $(selector).data('add'),
+                                    data: $(selector).closest('form').serialize(),
+                                    method: 'POST',
+                                    dataType: 'json',
+                                    success: function (data, textStatus, jqXHR) {
+                                        if (data.response && data.response.success) {
+                                            $('#modal-new').modal('hide');
+                                        }
+                                    }
+                                });
+                            }, 100);
                         });
                     });
                 }
@@ -245,19 +348,19 @@ define("core", function () {
                     $(selector).each(function () {
                         $(this).click(function (e) {
                             e.preventDefault();
-                            $.ajax({
-                                url: $(selector).data('save'),
-                                method: 'POST',
-                                dataType: 'json'
-                            });
+                            setTimeout(function () {
+                                $.ajax({
+                                    url: $(selector).data('save'),
+                                    method: 'POST',
+                                    dataType: 'json'
+                                });
+                            }, 100);
                         });
                     });
                 }
             }
         }
     };
-
-
     core.formValidator = {
         init: function (selector) {
             if ($(selector).length) {
@@ -285,7 +388,6 @@ define("core", function () {
                 errorMessage: 'User not found',
                 errorMessageKey: 'badUserExists'
             });
-
         },
         validateForm: function (selector) {
             core.formValidator.customValidators();
@@ -366,7 +468,6 @@ define("core", function () {
                         language: {
                             url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Portuguese-Brasil.json"
                         },
-                        processing: true,
                         serverSide: true,
                         ajax: {
                             url: '/assets/teste.json', //e.attr('data-source')
@@ -383,7 +484,6 @@ define("core", function () {
 //                            }
 //                        }
                     });
-
                 });
             });
         }
