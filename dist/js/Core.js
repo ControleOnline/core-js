@@ -60,7 +60,6 @@ define("core", function () {
         init: function () {
             $.ajaxSetup({
                 beforeSend: function () {
-
                     var elem = $('[data-clicked=true]');
                     if ($(elem).attr('data-add')) {
                         $(elem).append(core.show.spin('ajax-spin-add'));
@@ -107,10 +106,10 @@ define("core", function () {
                         $(elem).find('.ajax-spin-save').remove();
                         $(elem).prop("disabled", false);
                     }
-                    require(['jquery'], function ($) {
+                    require(['jquery', 'bootstrap'], function ($) {
                         $('#wait-modal,#confirm-delete').modal('hide');
                     });
-                    core.show.result(data);
+                    core.show.result(data, $(elem));
                 },
                 error: function (jqXHR, x, ajaxOptions, exception) {
                     var message;
@@ -145,16 +144,16 @@ define("core", function () {
         spin: function (cssClass) {
             return '<i class="' + cssClass + ' ajax-spin fa fa-spinner fa-spin"></i>';
         },
-        result: function (data) {
+        result: function (data, e) {
             if (typeof data === 'object') {
                 if (data.responseJSON) {
                     var data = JSON.parse(data.responseText);
                     if (data.response && data.response.success) {
-                        core.show.success();
+                        core.show.success(false, e, data);
                     } else if (data.response && data.response.error) {
-                        core.show.error(data.response.error);
+                        core.show.error(data.response.error, e);
                     } else {
-                        core.show.error();
+                        core.show.error(false, e);
                     }
                 } else if (data.responseText) {
                     var response = $(data.responseText);
@@ -172,13 +171,13 @@ define("core", function () {
                         core.bind('#' + id);
                     }
                 } else {
-                    core.show.error((data.response && data.response.error) ? data.response.error : null);
+                    core.show.error((data.response && data.response.error) ? data.response.error : null, e);
                 }
             } else {
-                core.show.error();
+                core.show.error(false, e);
             }
         },
-        error: function (error) {
+        error: function (error, e) {
             error = error ? error : 'Nenhuma resposta';
             if (typeof error === 'object') {
                 $.each(error, function (key, value) {
@@ -203,7 +202,7 @@ define("core", function () {
                 });
             });
         },
-        success: function (success) {
+        success: function (success, e, data) {
             success = success ? success : 'Sucesso!';
             if (typeof success === 'object') {
                 $.each(success, function (key, value) {
@@ -227,6 +226,24 @@ define("core", function () {
                     $(".message-" + id).delay(2000).remove();
                 });
             });
+
+            if ($(e).data('clone-field') && $(e).data('clone-target')) {
+                var c = $($(e).data('clone-field')).clone();
+                if (typeof data === 'object' && typeof data.response === 'object' && typeof data.response.data === 'object') {
+                    $.each(data.response.data, function (key, value) {
+                        $(c).find('[name="' + key + '"]').attr('value', value);
+                    });
+                    $.each(data.response.data, function (key, value) {
+                        c = $('<div>').append($(c)).html().replace(new RegExp('{' + key + '}', 'g'), value);
+                    });
+                }
+                $($(e).data('clone-target')).append($(c).removeClass('clone').removeClass('hidden').removeAttr('data-clone').hide(function () {
+                    core.bind(this);
+                    $(this).delay(800).fadeIn();
+                }));
+
+            }
+
         }
     };
     core.bind = function (selector) {
@@ -270,7 +287,7 @@ define("core", function () {
                     delete_modal += '</div>';
                     delete_modal += '<div class="modal-footer">';
                     delete_modal += '<button type="button" class="btn btn-default" data-dismiss="modal">' + $(selector).data('calcel-name') + '</button>';
-                    delete_modal += '<button data-id="' + $(selector).data('id') + '" data-delete="' + $(selector).data('delete-confirm') + '" name="delete-' + $(selector).data('id') + '" id="delete-' + $(selector).data('id') + '" type="button" class="delete btn btn-danger btn-ok">';
+                    delete_modal += '<button data-container-remove="' + $(selector).data('container-remove') + '" data-id="' + $(selector).data('id') + '" data-delete="' + $(selector).data('delete-confirm') + '" name="delete-' + $(selector).data('id') + '" id="delete-' + $(selector).data('id') + '" type="button" class="delete btn btn-danger btn-ok">';
                     delete_modal += $(selector).data('delete-name');
                     delete_modal += '</button>';
                     delete_modal += '</div>';
@@ -296,7 +313,9 @@ define("core", function () {
                                     dataType: 'json',
                                     success: function (data, textStatus, jqXHR) {
                                         if (data.response && data.response.success) {
-                                            $('#container-' + $(selector).attr('id')).fadeOut(1000);
+                                            $('#' + $(selector).data('container-remove') + '-' + $(selector).data('id')).fadeOut(1000, function () {
+                                                $(this).remove();
+                                            });
                                         }
                                     }
                                 });
@@ -308,12 +327,13 @@ define("core", function () {
             addForm: function (selector) {
                 if ($(selector).length) {
                     $(selector).each(function () {
-                        $(this).click(function (e) {
+                        var b = $(this);
+                        b.click(function (e) {
                             e.preventDefault();
                             setTimeout(function () {
                                 $.ajax({
                                     cache: true,
-                                    url: $(selector).data('add-form'),
+                                    url: $(b).data('add-form'),
                                     context: document.body
                                 });
                             }, 100);
