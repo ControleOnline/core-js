@@ -10,8 +10,14 @@ define("core", function () {
             baseUrl: '/vendor',
             paths: {},
             shim: {
-                jquery: {
+                "jquery": {
                     exports: "$"
+                },
+                "bootstrap": {
+                    require: ["jquery"]
+                },
+                "jquery.select2": {
+                    require: ["jquery"]
                 }
             }
         };
@@ -243,22 +249,27 @@ define("core", function () {
                 }));
 
             }
+            if ($(e).data('success-url')) {
+                window.location.href = $(e).data('success-url');
+            }
 
         }
     };
     core.bind = function (selector) {
-        selector = selector ? selector : '*';
-        core.crud.init.add($(selector).find("[data-add]"));
-        core.crud.init.addForm($(selector).find("[data-add-form]"));
-        core.crud.init.save($(selector).find("[data-save]"));
-        core.crud.init.deleteConfirm($(selector).find("[data-delete-confirm]"));
-        core.formValidator.init($(selector).find("[data-validation]").closest('form'));
-        //core.inputMask.init.mask($(selector).find("[data-mask]"));
-        //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
-        core.dataTables.init($(selector).find('.datatable'));
-        $(selector).find("*").click(function (e) {
-            $("*").removeAttr('data-clicked');
-            $(e.target).attr("data-clicked", true);
+        requirejs(['jquery-form-validator'], function () {
+            selector = selector ? selector : '*';
+            core.crud.init.add($(selector).find("[data-add]"));
+            core.crud.init.addForm($(selector).find("[data-add-form]"));
+            core.crud.init.save($(selector).find("[data-save]"));
+            core.crud.init.deleteConfirm($(selector).find("[data-delete-confirm]"));
+            core.formValidator.init($(selector).find("[data-validation]").closest('form'));
+            //core.inputMask.init.mask($(selector).find("[data-mask]"));
+            //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
+            core.dataTables.init($(selector).find('.datatable'));
+            $(selector).find("*").click(function (e) {
+                $("*").removeAttr('data-clicked');
+                $(e.target).attr("data-clicked", true);
+            });
         });
     };
     core.crud = {
@@ -344,20 +355,40 @@ define("core", function () {
             add: function (selector) {
                 if ($(selector).length) {
                     $(selector).each(function () {
+                        $(this).closest('form').submit(function (e) {
+                            e.preventDefault();
+                            setTimeout(function () {
+                                if ($(selector).closest('form').isValid()) {
+                                    $.ajax({
+                                        url: $(e).attr('action'),
+                                        data: $(e).serialize(),
+                                        method: 'POST',
+                                        dataType: 'json',
+                                        success: function (data, textStatus, jqXHR) {
+                                            if (data.response && data.response.success) {
+                                                $('#modal-new').modal('hide');
+                                            }
+                                        }
+                                    });
+                                }
+                            }, 100);
+                        });
                         $(this).click(function (e) {
                             e.preventDefault();
                             setTimeout(function () {
-                                $.ajax({
-                                    url: $(selector).data('add'),
-                                    data: $(selector).closest('form').serialize(),
-                                    method: 'POST',
-                                    dataType: 'json',
-                                    success: function (data, textStatus, jqXHR) {
-                                        if (data.response && data.response.success) {
-                                            $('#modal-new').modal('hide');
+                                if ($(selector).closest('form').isValid()) {
+                                    $.ajax({
+                                        url: $(selector).data('add'),
+                                        data: $(selector).closest('form').serialize(),
+                                        method: 'POST',
+                                        dataType: 'json',
+                                        success: function (data, textStatus, jqXHR) {
+                                            if (data.response && data.response.success) {
+                                                $('#modal-new').modal('hide');
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }, 100);
                         });
                     });
@@ -372,7 +403,8 @@ define("core", function () {
                                 $.ajax({
                                     url: $(selector).data('save'),
                                     method: 'POST',
-                                    dataType: 'json'
+                                    dataType: 'json',
+                                    data: $(selector).closest('form').serialize()
                                 });
                             }, 100);
                         });
