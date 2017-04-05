@@ -8,7 +8,9 @@ define("core", function () {
         var config = {
             waitSeconds: 0,
             baseUrl: '/vendor',
-            paths: {},
+            paths: {
+                gjsapi: 'https://www.google.com/jsapi' + '?c=' + core.systemVersion
+            },
             shim: {
                 "jquery": {
                     exports: "$"
@@ -27,7 +29,7 @@ define("core", function () {
         Object.keys(core.appFiles).forEach(function (key) {
             config.paths[key] = core.appFiles[key] + '.js?v=' + core.systemVersion;
         });
-        require.config(config);
+        requirejs.config(config);
     };
     core.guid = function () {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -37,7 +39,7 @@ define("core", function () {
     };
     core.ready = function () {
         this.config();
-        require(['jquery'], function ($) {
+        requirejs(['jquery'], function ($) {
             if ($.isReady) {
                 core.load.modules();
             }
@@ -49,12 +51,12 @@ define("core", function () {
     core.load = {
         modules: function () {
             $('body').removeAttr('data-js-files data-js-libs');
-            core.lazyLoad.init();
             core.bootstrap.init();
+            core.lazyLoad.init();
             core.ajax.init();
             core.bind();
             Object.keys(core.appFiles).forEach(function (key) {
-                require([key], function (appFile) {
+                requirejs([key], function (appFile) {
                     if (typeof appFile.init === 'function') {
                         appFile.init();
                     }
@@ -95,7 +97,7 @@ define("core", function () {
                         if (!$('body').find('#wait-modal').length) {
                             $('body').append(loading);
                         }
-                        require(['jquery', 'bootstrap'], function ($) {
+                        requirejs(['jquery', 'bootstrap'], function ($) {
                             $('#wait-modal').modal('show');
                         });
                     }
@@ -112,7 +114,7 @@ define("core", function () {
                         $(elem).find('.ajax-spin-save').remove();
                         $(elem).prop("disabled", false);
                     }
-                    require(['jquery', 'bootstrap'], function ($) {
+                    requirejs(['jquery', 'bootstrap'], function ($) {
                         $('#wait-modal,#confirm-delete').modal('hide');
                     });
                     core.show.result(data, $(elem));
@@ -255,6 +257,19 @@ define("core", function () {
 
         }
     };
+    core.gmaps = {
+        init: function (selector) {
+            var adress_search = $(selector).find('[data-gmaps="adress-search"]');
+            if (adress_search) {
+                requirejs(['GMaps', 'gjsapi'], function (GMaps) {
+                    if (GMaps) {
+                        GMaps.init('AIzaSyDgOkNZJUr66dvx75EQrzpaYZNEaXDNrfo');
+                        GMaps.bind.adress_search(adress_search);
+                    }
+                });
+            }
+        }
+    };
     core.bind = function (selector) {
         requirejs(['jquery-form-validator'], function () {
             selector = selector ? selector : '*';
@@ -266,6 +281,7 @@ define("core", function () {
             //core.inputMask.init.mask($(selector).find("[data-mask]"));
             //core.inputMask.init.maskRegex($(selector).find("[data-mask-regex]"));
             core.dataTables.init($(selector).find('.datatable'));
+            core.gmaps.init(selector);
             $(selector).find("*").click(function (e) {
                 $("*").removeAttr('data-clicked');
                 $(e.target).attr("data-clicked", true);
@@ -324,7 +340,7 @@ define("core", function () {
                                     dataType: 'json',
                                     success: function (data, textStatus, jqXHR) {
                                         if (data.response && data.response.success) {
-                                            $('#' + $(selector).data('container-remove') + '-' + $(selector).data('id')).fadeOut(1000, function () {
+                                            $('#' + $(selector).data('container-remove') + '-' + $(selector).data('id')).stop(true, true).slideUp(1000, function () {
                                                 $(this).remove();
                                             });
                                         }
@@ -416,7 +432,7 @@ define("core", function () {
     core.formValidator = {
         init: function (selector) {
             if ($(selector).length) {
-                require(['jquery', 'jquery-form-validator'], function ($) {
+                requirejs(['jquery', 'jquery-form-validator'], function ($) {
                     core.formValidator.validateForm(selector);
                 });
             }
@@ -452,7 +468,7 @@ define("core", function () {
             mask: function (selector) {
 
                 if ($(selector).length) {
-                    require(['inputmask', 'jquery.inputmask'], function () {
+                    requirejs(['inputmask', 'jquery.inputmask'], function () {
                         $(selector).each(function () {
                             $(this).inputmask(eval($(this).data('mask')));
                         });
@@ -474,7 +490,7 @@ define("core", function () {
                  });
                  */
                 if ($(selector).length) {
-                    require(['inputmask', 'jquery.inputmask', 'inputmask.regex.extensions'], function () {
+                    requirejs(['inputmask', 'jquery.inputmask', 'inputmask.regex.extensions'], function () {
                         $(selector).each(function () {
                             $(this).inputmask('Regex', eval($(this).data('mask-regex')));
                         });
@@ -485,14 +501,14 @@ define("core", function () {
     };
     core.bootstrap = {
         init: function () {
-            require(['bootstrap']);
+            requirejs(['bootstrap']);
         }
     };
     core.lazyLoad = {
         init: function () {
             if ($('[data-ll]').length) {
-                require(['lazyLoad'], function (lazyLoad) {
-                    lazyLoad.init();
+                requirejs(['lazyLoad'], function (lazyLoad) {
+                    lazyLoad.init();                    
                 });
             }
         }
@@ -505,7 +521,7 @@ define("core", function () {
             }
         },
         bind: function (table) {
-            require(['datatables.net', 'dataTables-bootstrap'], function (dt) {
+            requirejs(['datatables.net', 'dataTables-bootstrap'], function (dt) {
                 $(table).each(function (i) {
                     var e = $(this);
 //                    e.DataTable({language: {
@@ -541,7 +557,7 @@ define("core", function () {
         }
     };
     core.loadCss = function (url) {
-        var baseURL = require.toUrl('.');
+        var baseURL = requirejs.toUrl('.');
         var link = document.createElement("link");
         link.type = "text/css";
         link.rel = "stylesheet";
@@ -552,6 +568,6 @@ define("core", function () {
     };
     return core;
 });
-require(['core'], function (core) {
+requirejs(['core'], function (core) {
     core.ready();
 });
