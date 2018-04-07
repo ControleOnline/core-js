@@ -1,3 +1,4 @@
+
 {
   "directory" : "public/components",
   "name": "controleonline-core-js",
@@ -22,9 +23,14 @@
         "fontawesome":"*",
         "datatables": "*",
         "highcharts": "*",
-        "jquery.inputmask":"*",
-        "jquery-form-validator":"*",
-        "flat-admin-bootstrap-templates": "*"                                
+        "jquery.inputmask":"*",        
+        "blueimp-file-upload":"*",        
+        "bootstrap-horizontal-selector":"*",
+        "flat-admin-bootstrap-templates": "master",        
+        "jquery-ui": "*",
+        "jquery-validation":"*",
+        "blueimp-file-upload":"*",
+        "bootstrap-datepicker":"*"
     },
      "keywords": [
         "ControleOnline"
